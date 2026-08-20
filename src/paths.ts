@@ -5,3 +5,4 @@ const base = import.meta.env.BASE_URL;
 
 export const HOME_PATH = base;
 export const DEMO_PATH = `${base}demo/`;
+export const METHODOLOGY_PATH = `${base}methodology/`;

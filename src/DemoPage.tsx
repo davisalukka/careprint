@@ -1,5 +1,5 @@
 import { DashboardClient } from "./dashboard/DashboardClient";
-import { DEMO_PATH, HOME_PATH } from "./paths";
+import { DEMO_PATH, HOME_PATH, METHODOLOGY_PATH } from "./paths";
 
 const demoUser = { userId: "demo-user", displayName: "Demo User", email: "demo@careprint.local" };
 
@@ -23,7 +23,7 @@ export function DemoPage() {
         </div>
       </header>
       <DashboardClient user={demoUser} demoMode />
-      <footer className="dashboard-footer"><span>Careprint demo · no external services are called.</span><a href={`${DEMO_PATH}#method`}>How we estimate it ↗</a></footer>
+      <footer className="dashboard-footer"><span>Careprint demo · no external services are called.</span><a href={METHODOLOGY_PATH}>Full methodology ↗</a></footer>
     </main>
   );
 }

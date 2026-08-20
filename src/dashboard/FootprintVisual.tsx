@@ -14,19 +14,21 @@ import {
 import styles from "./FootprintVisual.module.css";
 
 // Each vector claims a compass direction around the core so the print stays
-// readable: beef top, salmon right, eggs bottom, milk left (slightly offset
-// so the silhouette reads organic rather than mechanical).
+// readable (slightly offset so the silhouette reads organic rather than
+// mechanical). Chicken sits on top — it's usually the biggest lever.
 const LOBE_ANGLES: Record<FoodKey, number> = {
-  beef: -104,
-  salmon: -12,
-  eggs: 78,
-  milk: 168,
+  chicken: -96,
+  eggs: -34,
+  pork: 28,
+  salmon: 86,
+  beef: 148,
+  milk: 208,
 };
 
 const CENTER = 170;
 const CORE_RADIUS = 57;
-// The heaviest possible single vector (beef, conventional, 3 servings).
-const MAX_VECTOR_POINTS = 72;
+// The heaviest possible single vector (chicken, conventional, 14 meals).
+const MAX_VECTOR_POINTS = 280;
 
 export function FootprintVisual({
   profile,
@@ -85,8 +87,8 @@ export function FootprintVisual({
 
           <g filter={`url(#${gooId})`}>
             <circle className={styles.core} cx={CENTER} cy={CENTER} r={CORE_RADIUS} fill={coreFill} />
-            {FOOD_KEYS.map((key) => (
-              <Lobe key={key} foodKey={key} profile={profile} breakdownValue={valueFor(key, breakdown)} />
+            {breakdown.map((point) => (
+              <Lobe key={point.key} foodKey={point.key} profile={profile} breakdownValue={point.value} color={point.color} />
             ))}
           </g>
           {/* Zero-signal vectors render as crisp seeds outside the goo filter,
@@ -132,10 +134,12 @@ function Lobe({
   foodKey,
   profile,
   breakdownValue,
+  color,
 }: {
   foodKey: FoodKey;
   profile: Profile;
   breakdownValue: number;
+  color: string;
 }) {
   const meta = FOOD_META[foodKey];
   const isPlant = profile.sources[foodKey] === "plant";
@@ -145,13 +149,13 @@ function Lobe({
   // Area-ish scaling keeps small contributions visible without letting beef
   // swallow the whole print. Zero-signal lobes collapse below the goo filter's
   // alpha threshold and hand off to the crisp seed layer.
-  const radius = breakdownValue === 0 ? 3 : 14 + 40 * Math.sqrt(breakdownValue / MAX_VECTOR_POINTS);
+  const radius = breakdownValue === 0 ? 3 : 12 + 42 * Math.sqrt(breakdownValue / MAX_VECTOR_POINTS);
   const angle = (LOBE_ANGLES[foodKey] * Math.PI) / 180;
   const distance = 72 + radius * 0.62;
   const x = CENTER + Math.cos(angle) * distance;
   const y = CENTER + Math.sin(angle) * distance;
 
-  const fill = isPlant ? "#b5d8c2" : lobeColor(foodKey);
+  const fill = isPlant ? "#b5d8c2" : color;
   const opacity = breakdownValue === 0 ? 0.55 : 0.92;
   // Kinder sources drift slowly and calmly; harsher ones shiver faster.
   const driftSeconds = 9 - 5.5 * severity;
@@ -208,13 +212,6 @@ function valueFor(key: FoodKey, breakdown: Array<{ key: FoodKey; value: number }
 
 function sourceLabelFor(key: FoodKey, profile: Profile): string {
   return FOOD_META[key].sources.find((option) => option.key === profile.sources[key])?.label ?? "Unknown";
-}
-
-function lobeColor(key: FoodKey): string {
-  if (key === "beef") return "#e27352";
-  if (key === "salmon") return "#6f9fa6";
-  if (key === "eggs") return "#e8bd58";
-  return "#8db59a";
 }
 
 // mint → amber → deep coral as directional pressure climbs.

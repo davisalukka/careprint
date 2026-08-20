@@ -19,6 +19,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "index.html"),
         demo: resolve(__dirname, "demo/index.html"),
+        methodology: resolve(__dirname, "methodology/index.html"),
       },
     },
   },
