@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   buildBreakdown,
   buildTrend,
@@ -20,6 +20,7 @@ import {
   type SourceKey,
 } from "../lib/footprint-model";
 import { AnalyticsPanel, type AnalyticsTone } from "./AnalyticsPanel";
+import { FootprintVisual } from "./FootprintVisual";
 import { MarketplacePanel } from "./MarketplacePanel";
 
 type User = { userId: string; displayName: string; email: string };
@@ -83,8 +84,6 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
     setView("overview");
   }
 
-  const ringStyle = { "--score-angle": `${Math.max(6, previewScore * 3.6)}deg` } as CSSProperties;
-
   const analyticsBreakdown = breakdown.map((item) => ({
     id: item.key,
     label: item.label,
@@ -139,7 +138,7 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
             <section className="dashboard-card score-card" aria-labelledby="score-heading">
               <div className="card-topline"><div><span className="label-caps">THIS WEEK’S ESTIMATE</span><h2 id="score-heading">Your cruelty footprint</h2></div><span className="status-pill status-pill-sage"><span /> {preview ? "Preview" : "On track"}</span></div>
               <div className="score-card-layout">
-                <div className="score-ring" style={ringStyle} aria-label={`${previewScore} out of 100 estimated welfare pressure`}><div className="score-ring-inner"><strong>{preview ? previewScore : score}</strong><span>/100</span><small>lower is kinder</small></div></div>
+                <FootprintVisual profile={preview ? preview.profile : profile} />
                 <div className="score-story">
                   {preview ? <p className="scenario-label">Maneuver preview · {previewDelta > 0 ? `−${previewDelta} points` : "no change"}</p> : null}
                   <h3>{preview ? preview.title : scoreLabel(score)}</h3>
@@ -178,6 +177,7 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
 
       {view === "baseline" ? (
         <>
+          <div className="baseline-grid">
           <section className="dashboard-card profile-card baseline-card" aria-labelledby="profile-heading">
             <div><span className="label-caps">YOUR BASELINE</span><h2 id="profile-heading">What’s in a normal week?</h2><p>These four inputs drive the estimate. Use the dials, then save a baseline when it feels like a fair description of your week.</p></div>
             <div className="baseline-summary"><span><strong>{score}</strong><small>current score</small></span><span><strong>{plantShare}%</strong><small>plant-forward</small></span><span><strong>{FOOD_KEYS.reduce((total, key) => total + profile.servings[key], 0)}</strong><small>tracked choices</small></span></div>
@@ -185,6 +185,13 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
             <button className="button button-primary button-wide" type="button" onClick={() => persistProfile(profile, setSyncState)}>Save my baseline</button>
             <p className="save-note">{demoMode ? "This demo keeps your changes in the current session only." : "Your estimate is private to your account. Vendor links are labeled so you can decide whether they’re useful."}</p>
           </section>
+          <aside className="dashboard-card baseline-visual-card" aria-labelledby="living-print-heading">
+            <span className="label-caps">YOUR LIVING CAREPRINT</span>
+            <h2 id="living-print-heading">Watch it respond.</h2>
+            <p>Every dial and source you pick reshapes the print in real time. Each lobe is one cruelty vector: it swells and shivers as pressure rises, calms as sourcing improves, and shrinks to a quiet seed on a plant-based swap. Smaller and calmer is kinder.</p>
+            <FootprintVisual profile={profile} showLegend />
+          </aside>
+          </div>
           <section className="dashboard-card section-card method-card" id="method" aria-labelledby="method-heading"><div className="method-copy"><span className="label-caps">THE METHOD, IN PLAIN ENGLISH</span><h2 id="method-heading">A transparent estimate beats a magic number.</h2><p>Careprint v0.2 combines how often a choice shows up with a directional welfare-pressure factor for the source. Charts and forecasts are explainable views over that same local model.</p></div><div className="method-formula"><div className="formula-line"><span>frequency</span> × <span>welfare signal</span> = <strong>weekly estimate</strong></div><div className="formula-line"><span>your baseline</span> − <span>one maneuver</span> = <strong>new estimate</strong></div><p className="formula-caption">Lower is kinder. No vendor can pay to change the math. This is an educational estimate, not a certification or a complete measure of animal suffering.</p></div></section>
         </>
       ) : null}
