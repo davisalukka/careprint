@@ -39,8 +39,8 @@ export function MarketplacePanel({ demoMode = false }: { demoMode?: boolean }) {
   return (
     <section className="dashboard-card marketplace-card" id="partners" aria-labelledby="marketplace-heading">
       <span className="label-caps">PARTNER MARKETPLACE</span>
-      <h2 id="marketplace-heading">Lower-footprint shopping, in one place.</h2>
-      <p>These are mock partner cards for the MVP. Live vendor links, affiliate IDs, and inventory feeds stay behind this boundary until they are connected.</p>
+      <h2 id="marketplace-heading">When you’re ready to shop kinder.</h2>
+      <p>These cards are stand-ins until real partnerships exist—live vendor links, affiliate IDs, and inventory stay unplugged for now. When a card goes live, it will say exactly why it earned its place here.</p>
       <div className="stub-banner"><span>◎</span> Mock connector active · no external redirect</div>
       {offers.map((offer) => (
         <button className="marketplace-link" key={offer.id} type="button" onClick={() => handleOfferClick(offer)} aria-label={`Preview ${offer.name} partner offer`}>

@@ -111,18 +111,18 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
       <section className="dashboard-welcome" id="overview">
         <div>
           <p className="eyebrow"><span className="eyebrow-dot" /> {demoMode ? "Interactive demo" : "Your private estimate"}</p>
-          <h1>Good morning, {firstName(user.displayName)}.</h1>
-          <p>{demoMode ? "Explore every dial and view with mock data. Nothing leaves this browser session." : "Here’s the one move that would make your week meaningfully kinder."}</p>
+          <h1>{greeting()}, {firstName(user.displayName)}.</h1>
+          <p>{demoMode ? "Every dial here is live, and nothing leaves this browser. Poke around—there’s nothing you can break." : "Here’s the one move that would make this week kinder than the last."}</p>
         </div>
         <div className={`sync-status ${syncState === "saved" ? "is-saved" : ""} ${syncState === "error" ? "is-error" : ""}`}>
           {syncState === "loading" && "Loading your profile…"}
           {syncState === "saved" && (demoMode ? "Demo mode · local only" : "Saved to your account")}
           {syncState === "dirty" && "Saving your changes…"}
-          {syncState === "error" && "Draft mode · database unavailable"}
+          {syncState === "error" && "Draft mode · changes held in memory only"}
         </div>
       </section>
 
-      {demoMode ? <div className="demo-banner"><span>◎</span><strong>Stubbed integration mode</strong><span>Authentication, partner clicks, inventory, and persistence stay local until you connect real services.</span></div> : null}
+      {demoMode ? <div className="demo-banner"><span>◎</span><strong>Stubbed integration mode</strong><span>Sign-in, partner clicks, inventory, and saving all run on local stand-ins—the full product shell, with nothing plugged into the wall.</span></div> : null}
 
       <div className="dashboard-view-tabs" role="tablist" aria-label="Dashboard views">
         {VIEW_OPTIONS.map((option) => (
@@ -142,19 +142,19 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
                 <div className="score-story">
                   {preview ? <p className="scenario-label">Maneuver preview · {previewDelta > 0 ? `−${previewDelta} points` : "no change"}</p> : null}
                   <h3>{preview ? preview.title : scoreLabel(score)}</h3>
-                  <p>{preview ? preview.description : "You’re already building a strong plant-forward baseline. The next leverage point is likely frequency, not perfection."}</p>
+                  <p>{preview ? preview.description : "Most of this number is habit, not identity. Change how often one choice shows up—no perfection required—and the score follows."}</p>
                   {preview ? <button className="text-link" onClick={() => setPreview(null)}>Reset preview ↺</button> : <span className="status-pill status-pill-sage"><span /> {plantShare}% plant-forward</span>}
                 </div>
               </div>
             </section>
             <section className="dashboard-card stats-card" aria-label="Weekly summary">
-              <div className="stat-block"><span className="label-caps">BEST NEXT MOVE</span><div className="stat-number"><strong>−{Math.max(0, score - bestNextScore)}</strong><span>points</span></div><p className="stat-detail"><strong>{scenarios[0]?.title ?? "Tune your baseline"}</strong><br />Try it for one week and reassess.</p></div>
-              <div className="stat-block"><span className="label-caps">PLANT-FORWARD</span><div className="stat-number"><strong>{plantShare}%</strong><span>of choices</span></div><p className="stat-detail">Plant-based source selections now count as plant-forward, not just zero-quantity items.</p><div className="mini-bars" aria-hidden="true"><span /><span /><span /><span /><span /></div></div>
+              <div className="stat-block"><span className="label-caps">BEST NEXT MOVE</span><div className="stat-number"><strong>−{Math.max(0, score - bestNextScore)}</strong><span>points</span></div><p className="stat-detail"><strong>{scenarios[0]?.title ?? "Tune your baseline"}</strong><br />Run it for one week, then decide if it stays.</p></div>
+              <div className="stat-block"><span className="label-caps">PLANT-FORWARD</span><div className="stat-number"><strong>{plantShare}%</strong><span>of choices</span></div><p className="stat-detail">Every plant-based pick counts here—not just the meals you skipped.</p><div className="mini-bars" aria-hidden="true"><span /><span /><span /><span /><span /></div></div>
             </section>
           </div>
 
           <section className="dashboard-card section-card" id="switch-lab" aria-labelledby="maneuver-heading">
-            <div className="section-card-heading"><div><span className="label-caps">LOWEST-HANGING FRUIT</span><h2 id="maneuver-heading">Try a maneuver</h2></div><p>Preview each move against your current pattern, then apply it to your baseline when it feels right.</p></div>
+            <div className="section-card-heading"><div><span className="label-caps">LOWEST-HANGING FRUIT</span><h2 id="maneuver-heading">Try a maneuver</h2></div><p>Each maneuver is one concrete change to one week. Preview it against your current pattern; apply it only when it feels livable.</p></div>
             <div className="maneuver-list">{scenarios.map((scenario) => { const delta = score - calculateScore(scenario.profile); const selected = preview?.id === scenario.id; return <div className="maneuver-item" key={scenario.id}><div className={`maneuver-icon ${scenario.tone === "coral" ? "coral" : scenario.tone === "yellow" ? "yellow" : ""}`}>{scenario.icon}</div><div className="maneuver-copy"><strong>{scenario.title}</strong><span>{scenario.description}</span></div><div className={`maneuver-delta ${delta <= 0 ? "is-done" : ""}`}>{delta > 0 ? `−${delta} pts` : "Already in place"}</div><div className="maneuver-cost">{scenario.cost}</div><div className="maneuver-actions"><button className="maneuver-button" type="button" onClick={() => setPreview(selected ? null : scenario)} aria-pressed={selected}>{selected ? "Selected" : "Preview →"}</button>{selected ? <button className="maneuver-apply-button" type="button" onClick={() => applyScenario(scenario)}>Apply & save</button> : null}</div></div>; })}</div>
           </section>
 
@@ -166,12 +166,12 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
         <AnalyticsPanel
           score={score}
           scoreLabel={scoreLabel(score)}
-          forecast={{ score: bestNextScore, label: "If you take your best next move", period: "NEXT WEEK", description: "A preview only—your score changes when you apply a maneuver to your baseline." }}
+          forecast={{ score: bestNextScore, label: "If you take your best next move", period: "NEXT WEEK", description: "A preview, not a promise—the score only moves when you apply a maneuver to your baseline." }}
           breakdown={analyticsBreakdown}
           weeklyTrend={analyticsTrend}
           scenarios={analyticsScenarios}
           title="See the pattern, then choose the lever."
-          description="Charts are generated from your current local baseline. The trend is a clearly labeled simulated history until real check-ins are connected."
+          description="Everything below is drawn from your current local baseline. The trend is simulated for now—clearly labeled, and retired the day real weekly check-ins arrive."
         />
       ) : null}
 
@@ -179,20 +179,20 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
         <>
           <div className="baseline-grid">
           <section className="dashboard-card profile-card baseline-card" aria-labelledby="profile-heading">
-            <div><span className="label-caps">YOUR BASELINE</span><h2 id="profile-heading">What’s in a normal week?</h2><p>These four inputs drive the estimate. Use the dials, then save a baseline when it feels like a fair description of your week.</p></div>
+            <div><span className="label-caps">YOUR BASELINE</span><h2 id="profile-heading">What’s in a normal week?</h2><p>These four inputs drive the whole estimate. Describe the week you actually have—not the one you’re aiming for—and save it when it feels fair.</p></div>
             <div className="baseline-summary"><span><strong>{score}</strong><small>current score</small></span><span><strong>{plantShare}%</strong><small>plant-forward</small></span><span><strong>{FOOD_KEYS.reduce((total, key) => total + profile.servings[key], 0)}</strong><small>tracked choices</small></span></div>
             {FOOD_KEYS.map((key) => { const meta = FOOD_META[key]; return <div className="profile-row" key={key}><div className="profile-label"><strong>{meta.label}</strong><span>{formatServing(profile.servings[key], meta.unit.split(" ")[0])}</span></div><div className="profile-control"><label className="sr-only" htmlFor={`${key}-servings`}>{meta.label} {meta.unit}</label><input id={`${key}-servings`} type="range" min="0" max="3" step="1" value={profile.servings[key]} onChange={(event) => changeServing(key, Number(event.target.value))} /><output htmlFor={`${key}-servings`}>{profile.servings[key]}</output></div><label className="sr-only" htmlFor={`${key}-source`}>{meta.label} source</label><select id={`${key}-source`} className="profile-select" value={profile.sources[key]} onChange={(event) => changeSource(key, event.target.value as SourceKey)}>{meta.sources.map((source) => <option key={source.key} value={source.key}>{source.label}</option>)}</select></div>; })}
             <button className="button button-primary button-wide" type="button" onClick={() => persistProfile(profile, setSyncState)}>Save my baseline</button>
-            <p className="save-note">{demoMode ? "This demo keeps your changes in the current session only." : "Your estimate is private to your account. Vendor links are labeled so you can decide whether they’re useful."}</p>
+            <p className="save-note">{demoMode ? "The demo saves to this browser only. Clear your site data and the slate wipes clean." : "Your estimate is private to your account. Vendor links are labeled so you can decide whether they’re useful."}</p>
           </section>
           <aside className="dashboard-card baseline-visual-card" aria-labelledby="living-print-heading">
             <span className="label-caps">YOUR LIVING CAREPRINT</span>
             <h2 id="living-print-heading">Watch it respond.</h2>
-            <p>Every dial and source you pick reshapes the print in real time. Each lobe is one cruelty vector: it swells and shivers as pressure rises, calms as sourcing improves, and shrinks to a quiet seed on a plant-based swap. Smaller and calmer is kinder.</p>
+            <p>This is your week, drawn live. Each lobe is one cruelty vector—it swells and quickens as pressure rises, settles as your sourcing gets kinder, and drops to a seed when a choice goes plant-based. Think of it as gardening: you’re growing a smaller, calmer print.</p>
             <FootprintVisual profile={profile} showLegend />
           </aside>
           </div>
-          <section className="dashboard-card section-card method-card" id="method" aria-labelledby="method-heading"><div className="method-copy"><span className="label-caps">THE METHOD, IN PLAIN ENGLISH</span><h2 id="method-heading">A transparent estimate beats a magic number.</h2><p>Careprint v0.2 combines how often a choice shows up with a directional welfare-pressure factor for the source. Charts and forecasts are explainable views over that same local model.</p></div><div className="method-formula"><div className="formula-line"><span>frequency</span> × <span>welfare signal</span> = <strong>weekly estimate</strong></div><div className="formula-line"><span>your baseline</span> − <span>one maneuver</span> = <strong>new estimate</strong></div><p className="formula-caption">Lower is kinder. No vendor can pay to change the math. This is an educational estimate, not a certification or a complete measure of animal suffering.</p></div></section>
+          <section className="dashboard-card section-card method-card" id="method" aria-labelledby="method-heading"><div className="method-copy"><span className="label-caps">THE METHOD, IN PLAIN ENGLISH</span><h2 id="method-heading">A transparent estimate beats a magic number.</h2><p>Careprint multiplies how often a choice shows up by a directional welfare signal for its source. That’s the entire model—every chart and forecast on this page is another view of the same arithmetic, so nothing here can surprise you.</p></div><div className="method-formula"><div className="formula-line"><span>frequency</span> × <span>welfare signal</span> = <strong>weekly estimate</strong></div><div className="formula-line"><span>your baseline</span> − <span>one maneuver</span> = <strong>new estimate</strong></div><p className="formula-caption">Lower is kinder. No vendor can pay to change the math. This is an educational estimate, not a certification or a complete measure of animal suffering.</p></div></section>
         </>
       ) : null}
     </>
@@ -226,6 +226,14 @@ function readStoredProfile(): Profile | null {
 
 function firstName(displayName: string): string {
   return displayName.trim().split(/\s+/)[0] || "there";
+}
+
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 5) return "Up late";
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 function toneForFood(key: FoodKey): AnalyticsTone {

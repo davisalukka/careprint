@@ -109,7 +109,7 @@ export function scoreLabel(score: number): string {
 
 export function formatServing(value: number, unit: string): string {
   if (value === 0) return "None";
-  return `${value} ${unit}`;
+  return `${value} ${value === 1 ? unit.replace(/s$/, "") : unit}`;
 }
 
 export function makeScenarios(profile: Profile): Scenario[] {
@@ -127,10 +127,10 @@ export function makeScenarios(profile: Profile): Scenario[] {
   // Annotated so the literal `tone` values narrow to Scenario's union
   // instead of widening to string.
   const scenarios: Scenario[] = [
-    { id: "beef-less", title: "Make beef occasional", description: "Replace one serving with beans, lentils, or tofu.", cost: "Usually saves money", icon: "✦", tone: "coral", profile: beefLess },
-    { id: "salmon-less", title: "Make salmon a treat", description: "Keep the ocean-aware choice, just make it occasional.", cost: "Usually saves $", icon: "≈", tone: "mint", profile: salmonLess },
-    { id: "eggs-better", title: eggsAlreadyPasture ? "Use one less egg dozen" : "Choose pasture-raised eggs", description: eggsAlreadyPasture ? "The next small lever after your strong sourcing choice." : "A high-confidence sourcing upgrade for the same recipe.", cost: eggsAlreadyPasture ? "Saves a little" : "Small weekly uplift", icon: "○", tone: "yellow", profile: eggMove },
-    { id: "milk-plant", title: "Use plant milk every day", description: "Keep dairy for the moments where it matters most.", cost: "Often costs less", icon: "⌁", tone: "mint", profile: milkPlant },
+    { id: "beef-less", title: "Make beef occasional", description: "Swap one serving for beans, lentils, or tofu—the single biggest lever on the board.", cost: "Usually saves money", icon: "✦", tone: "coral", profile: beefLess },
+    { id: "salmon-less", title: "Make salmon a treat", description: "Same fish, fewer appearances. Frequency is the kindest lever here.", cost: "Usually saves money", icon: "≈", tone: "mint", profile: salmonLess },
+    { id: "eggs-better", title: eggsAlreadyPasture ? "Trim a dozen eggs" : "Choose pasture-raised eggs", description: eggsAlreadyPasture ? "Your sourcing is already strong—the next lever is quantity." : "The same recipes, a meaningfully better life behind them.", cost: eggsAlreadyPasture ? "Saves a little" : "Small weekly uplift", icon: "○", tone: "yellow", profile: eggMove },
+    { id: "milk-plant", title: "Make plant milk the default", description: "Save dairy for the moments where it actually matters to you.", cost: "Often costs less", icon: "⌁", tone: "mint", profile: milkPlant },
   ];
 
   return scenarios.sort((a, b) => calculateScore(a.profile) - calculateScore(b.profile));
