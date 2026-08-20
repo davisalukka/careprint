@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type CSSProperties } from "react";
+import { useEffect, useRef } from "react";
 import {
   buildBreakdown,
   calculateScore,
@@ -13,22 +13,33 @@ import {
 } from "../lib/footprint-model";
 import styles from "./FootprintVisual.module.css";
 
-// Each vector claims a compass direction around the core so the print stays
-// readable (slightly offset so the silhouette reads organic rather than
-// mechanical). Chicken sits on top — it's usually the biggest lever.
-const LOBE_ANGLES: Record<FoodKey, number> = {
-  chicken: -96,
-  eggs: -34,
-  pork: 28,
-  salmon: 86,
-  beef: 148,
-  milk: 208,
+/**
+ * The Ember: one coherent ball for the whole week. Every vector you add packs
+ * more grains of matter into it — the mass grows, compacts, heats toward deep
+ * red, and trembles under harsher sourcing. Draining vectors dissolves the
+ * grains until only a faint, transparent shell is left at zero.
+ */
+
+const SIZE = 680;
+const CENTER = SIZE / 2;
+const TAU = Math.PI * 2;
+const GRAINS_PER_POINT = 3.4;
+
+type Grain = {
+  a: number;
+  rr: number;
+  ph: number;
+  size: number;
+  alpha: number;
+  dying: boolean;
+  tint: number;
 };
 
-const CENTER = 170;
-const CORE_RADIUS = 57;
-// The heaviest possible single vector (chicken, conventional, 14 meals).
-const MAX_VECTOR_POINTS = 280;
+type Sim = {
+  target: { score: number; sev: number };
+  score: number;
+  grains: Grain[];
+};
 
 export function FootprintVisual({
   profile,
@@ -37,67 +48,53 @@ export function FootprintVisual({
   profile: Profile;
   showLegend?: boolean;
 }) {
-  const uid = useId();
-  const gooId = `${uid}-goo`;
-  const auraId = `${uid}-aura`;
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const simRef = useRef<Sim | null>(null);
 
   const score = calculateScore(profile);
   const breakdown = buildBreakdown(profile);
-  const heat = heatColor(score);
-  const coreFill = mixHex(heat, "#fffdf9", 0.84);
-  const auraRadius = 96 + score * 0.45;
-  const pulseSeconds = 6.4 - 4 * (score / 100);
+  const severity = weightedSeverity(profile);
+  const hot = score > 62;
+  const totalValue = breakdown.reduce((sum, point) => sum + point.value, 0);
+
+  if (!simRef.current) {
+    simRef.current = { target: { score, sev: severity }, score, grains: [] };
+    retarget(simRef.current);
+  }
+
+  useEffect(() => {
+    const sim = simRef.current;
+    if (!sim) return;
+    sim.target = { score, sev: severity };
+    retarget(sim);
+  }, [score, severity]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    const loop = (t: number) => {
+      const sim = simRef.current;
+      if (sim) drawEmber(ctx, sim, reduced ? 0 : t);
+      raf = window.requestAnimationFrame(loop);
+    };
+    raf = window.requestAnimationFrame(loop);
+    return () => window.cancelAnimationFrame(raf);
+  }, []);
 
   const ariaLabel = [
-    `Living footprint visual: ${score} out of 100, ${scoreLabel(score).toLowerCase()}.`,
-    ...breakdown.map((point) => {
-      const sourceLabel = sourceLabelFor(point.key, profile);
-      return `${point.label}: ${point.value} points (${sourceLabel}).`;
-    }),
+    `Living footprint visual: one ball of estimated pressure, ${score} out of 100, ${scoreLabel(score).toLowerCase()}.`,
+    "It grows and reddens as weekly pressure accumulates and fades toward transparent at zero.",
+    ...breakdown.map((point) => `${point.label}: ${point.value} points (${sourceLabelFor(point.key, profile)}).`),
   ].join(" ");
 
   return (
     <div className={styles.wrap}>
       <figure className={styles.figure} role="img" aria-label={ariaLabel}>
-        <svg className={styles.svg} viewBox="0 0 340 340" aria-hidden="true">
-          <defs>
-            {/* Blur + alpha contrast makes the lobes merge like a living blob. */}
-            <filter id={gooId} x="-35%" y="-35%" width="170%" height="170%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="blur" />
-              <feColorMatrix
-                in="blur"
-                mode="matrix"
-                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"
-              />
-            </filter>
-            <radialGradient id={auraId}>
-              <stop offset="0%" stopColor={heat} stopOpacity="0.3" />
-              <stop offset="100%" stopColor={heat} stopOpacity="0" />
-            </radialGradient>
-          </defs>
-
-          <circle className={styles.aura} cx={CENTER} cy={CENTER} r={auraRadius} fill={`url(#${auraId})`} />
-          <circle
-            className={styles.pulse}
-            cx={CENTER}
-            cy={CENTER}
-            r="122"
-            style={{ stroke: heat, animationDuration: `${pulseSeconds.toFixed(2)}s` }}
-          />
-
-          <g filter={`url(#${gooId})`}>
-            <circle className={styles.core} cx={CENTER} cy={CENTER} r={CORE_RADIUS} fill={coreFill} />
-            {breakdown.map((point) => (
-              <Lobe key={point.key} foodKey={point.key} profile={profile} breakdownValue={point.value} color={point.color} />
-            ))}
-          </g>
-          {/* Zero-signal vectors render as crisp seeds outside the goo filter,
-              which would otherwise threshold small blurred shapes away. */}
-          {FOOD_KEYS.map((key) => (
-            <Seed key={key} foodKey={key} active={valueFor(key, breakdown) === 0} />
-          ))}
-        </svg>
-        <div className={styles.overlay} aria-hidden="true">
+        <canvas ref={canvasRef} className={styles.canvas} width={SIZE} height={SIZE} aria-hidden="true" />
+        <div className={`${styles.overlay} ${hot ? styles.overlayHot : ""}`} aria-hidden="true">
           <strong>{score}</strong>
           <span>/100</span>
           <small>lower is kinder</small>
@@ -108,18 +105,19 @@ export function FootprintVisual({
         <ul className={styles.legend}>
           {breakdown.map((point) => {
             const isPlant = profile.sources[point.key] === "plant";
+            const share = totalValue > 0 ? point.value / totalValue : 0;
             return (
               <li key={point.key}>
                 <span
                   className={styles.legendDot}
-                  style={{ background: isPlant ? "#b5d8c2" : point.color }}
+                  style={{ background: heatColor(score), opacity: isPlant || point.value === 0 ? 0.15 : 0.25 + share * 0.75 }}
                 />
                 <div>
                   <strong>{point.label}</strong>
                   <span>{sourceLabelFor(point.key, profile)} · {point.detail}</span>
                 </div>
                 <b className={styles.legendPts} style={{ color: point.value === 0 ? "var(--sage)" : "var(--ink)" }}>
-                  {point.value === 0 ? (isPlant ? "seed 🌱" : "quiet") : `${point.value} pts`}
+                  {point.value === 0 ? (isPlant ? "clear 🌱" : "quiet") : `${point.value} pts`}
                 </b>
               </li>
             );
@@ -130,94 +128,94 @@ export function FootprintVisual({
   );
 }
 
-function Lobe({
-  foodKey,
-  profile,
-  breakdownValue,
-  color,
-}: {
-  foodKey: FoodKey;
-  profile: Profile;
-  breakdownValue: number;
-  color: string;
-}) {
-  const meta = FOOD_META[foodKey];
-  const isPlant = profile.sources[foodKey] === "plant";
-  const maxPoints = Math.max(...meta.sources.map((option) => option.points));
-  const severity = maxPoints > 0 ? pointsFor(foodKey, profile.sources[foodKey]) / maxPoints : 0;
-
-  // Area-ish scaling keeps small contributions visible without letting beef
-  // swallow the whole print. Zero-signal lobes collapse below the goo filter's
-  // alpha threshold and hand off to the crisp seed layer.
-  const radius = breakdownValue === 0 ? 3 : 12 + 42 * Math.sqrt(breakdownValue / MAX_VECTOR_POINTS);
-  const angle = (LOBE_ANGLES[foodKey] * Math.PI) / 180;
-  const distance = 72 + radius * 0.62;
-  const x = CENTER + Math.cos(angle) * distance;
-  const y = CENTER + Math.sin(angle) * distance;
-
-  const fill = isPlant ? "#b5d8c2" : color;
-  const opacity = breakdownValue === 0 ? 0.55 : 0.92;
-  // Kinder sources drift slowly and calmly; harsher ones shiver faster.
-  const driftSeconds = 9 - 5.5 * severity;
-  const amp = Math.max(0.3, radius / 44);
-  const ampStyle = { "--amp": amp } as CSSProperties;
-
-  return (
-    <g className={styles.lobe} style={{ transform: `translate(${x}px, ${y}px)` }}>
-      <g className={styles.breathe} style={{ animationDuration: `${(6 + severity * -1.5 + amp).toFixed(2)}s` }}>
-        <circle className={styles.blob} r={radius} fill={fill} opacity={opacity} />
-        <g className={styles.driftA} style={{ ...ampStyle, animationDuration: `${driftSeconds.toFixed(2)}s` }}>
-          <circle
-            className={styles.blob}
-            cx={radius * 0.55}
-            cy={-radius * 0.3}
-            r={radius * 0.52}
-            fill={fill}
-            opacity={opacity * 0.9}
-          />
-        </g>
-        <g className={styles.driftB} style={{ ...ampStyle, animationDuration: `${(driftSeconds * 1.35).toFixed(2)}s` }}>
-          <circle
-            className={styles.blob}
-            cx={-radius * 0.44}
-            cy={radius * 0.4}
-            r={radius * 0.38}
-            fill={fill}
-            opacity={opacity * 0.85}
-          />
-        </g>
-      </g>
-    </g>
-  );
+/** How much of the week's pressure comes from harsher tiers, 0..1. */
+function weightedSeverity(profile: Profile): number {
+  let weighted = 0;
+  let total = 0;
+  for (const key of FOOD_KEYS) {
+    const value = profile.servings[key] * pointsFor(key, profile.sources[key]);
+    const maxPoints = Math.max(...FOOD_META[key].sources.map((option) => option.points));
+    if (maxPoints > 0) weighted += value * (pointsFor(key, profile.sources[key]) / maxPoints);
+    total += value;
+  }
+  return total > 0 ? weighted / total : 0;
 }
 
-function Seed({ foodKey, active }: { foodKey: FoodKey; active: boolean }) {
-  const angle = (LOBE_ANGLES[foodKey] * Math.PI) / 180;
-  const x = CENTER + Math.cos(angle) * 88;
-  const y = CENTER + Math.sin(angle) * 88;
-  return (
-    <g
-      className={styles.seed}
-      style={{ opacity: active ? 1 : 0, transform: `translate(${x}px, ${y}px)` }}
-    >
-      <circle r="8" fill="#b5d8c2" stroke="#8db59a" strokeWidth="1.5" />
-      <circle cx="4.5" cy="-8" r="3" fill="#50735a" />
-    </g>
-  );
+function retarget(sim: Sim): void {
+  const want = Math.round(sim.target.score * GRAINS_PER_POINT);
+  const alive = sim.grains.filter((grain) => !grain.dying);
+  for (let i = alive.length; i < want; i += 1) {
+    sim.grains.push({
+      a: Math.random() * TAU,
+      rr: Math.sqrt(Math.random()),
+      ph: Math.random() * TAU,
+      size: 2.2 + Math.random() * 3.4,
+      alpha: 0,
+      dying: false,
+      tint: Math.random(),
+    });
+  }
+  for (let i = want; i < alive.length; i += 1) alive[i].dying = true;
+  for (let i = 0; i < Math.min(want, alive.length); i += 1) alive[i].dying = false;
 }
 
-function valueFor(key: FoodKey, breakdown: Array<{ key: FoodKey; value: number }>): number {
-  return breakdown.find((point) => point.key === key)?.value ?? 0;
+function drawEmber(ctx: CanvasRenderingContext2D, sim: Sim, t: number): void {
+  ctx.clearRect(0, 0, SIZE, SIZE);
+  sim.score += (sim.target.score - sim.score) * 0.06;
+  const k = sim.score / 100;
+  const h = heatColor(sim.score);
+  const radius = 74 + 137 * Math.sqrt(k);
+
+  // Ambient glow grows with heat.
+  const glow = ctx.createRadialGradient(CENTER, CENTER, radius * 0.2, CENTER, CENTER, radius * 1.5);
+  glow.addColorStop(0, `${h}55`);
+  glow.addColorStop(1, `${h}00`);
+  ctx.fillStyle = glow;
+  ctx.globalAlpha = 0.25 + 0.65 * k;
+  ctx.beginPath();
+  ctx.arc(CENTER, CENTER, radius * 1.5, 0, TAU);
+  ctx.fill();
+
+  // A faint cool shell, so zero is still a presence — just a transparent one.
+  ctx.globalAlpha = 0.16 + 0.1 * (1 - k);
+  ctx.strokeStyle = "#193024";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(CENTER, CENTER, radius, 0, TAU);
+  ctx.stroke();
+
+  for (let i = sim.grains.length - 1; i >= 0; i -= 1) {
+    const grain = sim.grains[i];
+    grain.alpha += grain.dying ? -0.025 : (1 - grain.alpha) * 0.035;
+    if (grain.alpha <= 0) {
+      sim.grains.splice(i, 1);
+      continue;
+    }
+    if (t !== 0) {
+      grain.ph += 0.01 + 0.05 * sim.target.sev * k;
+      grain.a += 0.0012 + 0.0022 * k;
+    }
+    const jitter = (1.2 + 6.5 * sim.target.sev * k) * Math.sin(grain.ph);
+    const rr = grain.rr * (radius - 8) + jitter;
+    const x = CENTER + Math.cos(grain.a) * rr;
+    const y = CENTER + Math.sin(grain.a) * rr;
+    ctx.beginPath();
+    ctx.arc(x, y, grain.size * (0.75 + 0.5 * k), 0, TAU);
+    ctx.fillStyle = mixHex(h, grain.tint > 0.5 ? "#1c0d08" : "#ffffff", 0.22 * Math.abs(grain.tint - 0.5) * 2);
+    ctx.globalAlpha = grain.alpha * (0.28 + 0.6 * k);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 }
 
 function sourceLabelFor(key: FoodKey, profile: Profile): string {
   return FOOD_META[key].sources.find((option) => option.key === profile.sources[key])?.label ?? "Unknown";
 }
 
-// mint → amber → deep coral as directional pressure climbs.
+// Cool translucent mint → amber → deep saturated red as pressure climbs.
 function heatColor(score: number): string {
-  if (score <= 50) return mixHex("#8fbf9f", "#e8bd58", score / 50);
-  return mixHex("#e8bd58", "#c65438", (score - 50) / 50);
+  if (score <= 50) return mixHex("#9fc4ab", "#e8a24b", score / 50);
+  return mixHex("#e8a24b", "#b3271b", (score - 50) / 50);
 }
 
 function mixHex(from: string, to: string, t: number): string {
