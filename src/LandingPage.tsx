@@ -1,33 +1,18 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
+import { DEMO_PATH, HOME_PATH } from "./paths";
 
-export const metadata: Metadata = {
-  title: "Careprint — make the kindest next swap",
-  description:
-    "A private, practical dashboard for lowering the animal-welfare pressure in your weekly food choices.",
-};
-
-const dashboardPath = "/dashboard";
-
-export default async function Home() {
-  const user = await getChatGPTUser();
-  const dashboardLink = user ? dashboardPath : chatGPTSignInPath(dashboardPath);
-
+export function LandingPage() {
   return (
     <main className="site-shell">
       <header className="site-header">
-        <Link className="brand-lockup" href="/" aria-label="Careprint home">
+        <a className="brand-lockup" href={HOME_PATH} aria-label="Careprint home">
           <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span>
           <span><strong>careprint</strong><small>food choices, made kinder</small></span>
-        </Link>
+        </a>
         <nav className="top-nav" aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#trust">Our promise</a>
-          <a href="/demo">Try demo</a>
-          <a className="button button-small button-ghost" href={dashboardLink}>
-            {user ? "Open dashboard" : "Sign in"}
-          </a>
+          <a href={DEMO_PATH}>Try demo</a>
+          <a className="button button-small button-ghost" href={DEMO_PATH}>Open demo</a>
         </nav>
       </header>
 
@@ -41,10 +26,10 @@ export default async function Home() {
             you, and steadily lower the animal-welfare pressure in your basket.
           </p>
           <div className="hero-actions">
-            <a className="button button-primary" href={dashboardLink}>
-              {user ? "Open my estimate" : "Start my estimate"}<span aria-hidden="true">↗</span>
+            <a className="button button-primary" href={DEMO_PATH}>
+              Start my estimate<span aria-hidden="true">↗</span>
             </a>
-            <a className="text-link" href="/demo">Try the interactive demo <span aria-hidden="true">↗</span></a>
+            <a className="text-link" href={DEMO_PATH}>Try the interactive demo <span aria-hidden="true">↗</span></a>
           </div>
           <div className="trust-line">
             <span className="avatar-stack" aria-hidden="true"><i>J</i><i>M</i><i>A</i></span>
@@ -123,7 +108,7 @@ export default async function Home() {
       <footer className="site-footer">
         <div className="brand-lockup brand-lockup-footer"><span className="brand-mark" aria-hidden="true"><span /><span /><span /></span><span><strong>careprint</strong><small>food choices, made kinder</small></span></div>
         <p>© 2026 Careprint · An independent estimate, not a certification.</p>
-        <a href={dashboardLink}>{user ? "Dashboard ↗" : "Sign in ↗"}</a>
+        <a href={DEMO_PATH}>Open demo ↗</a>
       </footer>
     </main>
   );
