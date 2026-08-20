@@ -33,10 +33,29 @@ test("the demo mounts the dashboard with local-only state", async () => {
   assert.match(client, /AnalyticsPanel/);
   assert.match(client, /dashboard-view-tabs/);
   assert.match(client, /Apply & save/);
+  // The living careprint visual reacts to the local profile in both the
+  // Overview preview and the Baseline controls.
+  assert.match(client, /FootprintVisual profile=\{preview \? preview\.profile : profile\}/);
+  assert.match(client, /FootprintVisual profile=\{profile\} showLegend/);
   // The static site has no server: the baseline autosaves to localStorage and
   // must never reach for an API route.
   assert.match(client, /localStorage/);
   assert.doesNotMatch(client, /\/api\//);
+});
+
+test("the living careprint visual is a pure local render of the model", async () => {
+  const visual = await source("src/dashboard/FootprintVisual.tsx");
+
+  // Driven entirely by the deterministic footprint model — no fetches, no APIs.
+  assert.match(visual, /calculateScore/);
+  assert.match(visual, /buildBreakdown/);
+  assert.doesNotMatch(visual, /fetch\(/);
+  assert.doesNotMatch(visual, /https?:\/\//);
+  // The visual stays accessible: a described figure, and motion that respects
+  // the reduced-motion preference in its stylesheet.
+  assert.match(visual, /aria-label=\{ariaLabel\}/);
+  const visualCss = await source("src/dashboard/FootprintVisual.module.css");
+  assert.match(visualCss, /prefers-reduced-motion/);
 });
 
 test("external boundaries are deterministic local stubs", async () => {

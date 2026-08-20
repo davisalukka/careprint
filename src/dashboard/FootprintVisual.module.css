@@ -1,0 +1,204 @@
+.wrap {
+  width: 100%;
+}
+
+.figure {
+  aspect-ratio: 1;
+  container-type: inline-size;
+  margin: 0 auto;
+  position: relative;
+  width: min(100%, 268px);
+}
+
+.svg {
+  display: block;
+  height: 100%;
+  overflow: visible;
+  width: 100%;
+}
+
+/* Geometry eases between states so slider/source changes feel alive, not jumpy. */
+.aura {
+  transition: r 750ms cubic-bezier(0.22, 1, 0.36, 1), opacity 600ms ease;
+}
+
+.core {
+  transition: fill 700ms ease;
+}
+
+.lobe {
+  transition: transform 750ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blob {
+  transition:
+    r 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    cx 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    cy 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    fill 600ms ease,
+    opacity 600ms ease;
+}
+
+.breathe {
+  animation: breathe 6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.driftA {
+  animation: driftA 7s ease-in-out infinite alternate;
+}
+
+.driftB {
+  animation: driftB 9s ease-in-out infinite alternate;
+}
+
+.seed {
+  transition: opacity 600ms ease, transform 750ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pulse {
+  animation: pulse 4.5s ease-out infinite;
+  fill: none;
+  opacity: 0;
+  stroke-width: 1.5;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+
+.overlay {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+}
+
+.overlay strong {
+  font-size: 44px;
+  font-size: 15cqw;
+  font-weight: 500;
+  letter-spacing: -0.09em;
+  line-height: 0.92;
+}
+
+.overlay span {
+  color: var(--muted);
+  font-size: 10px;
+  font-size: 4.2cqw;
+}
+
+.overlay small {
+  color: var(--sage);
+  font-size: 8px;
+  font-size: 3.1cqw;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.legend {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.legend li {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  display: flex;
+  gap: 10px;
+  padding: 9px 11px;
+}
+
+.legendDot {
+  border-radius: 99px;
+  flex: none;
+  height: 10px;
+  transition: background 500ms ease;
+  width: 10px;
+}
+
+.legend strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: -0.02em;
+}
+
+.legend li > div > span {
+  color: var(--muted);
+  display: block;
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.legendPts {
+  font-size: 11px;
+  font-weight: 800;
+  margin-left: auto;
+  transition: color 400ms ease;
+  white-space: nowrap;
+}
+
+@keyframes breathe {
+  from {
+    transform: scale(0.965);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes driftA {
+  from {
+    transform: translate(calc(var(--amp, 1) * -7px), calc(var(--amp, 1) * 5px));
+  }
+  to {
+    transform: translate(calc(var(--amp, 1) * 9px), calc(var(--amp, 1) * -7px));
+  }
+}
+
+@keyframes driftB {
+  from {
+    transform: translate(calc(var(--amp, 1) * 8px), calc(var(--amp, 1) * 6px));
+  }
+  to {
+    transform: translate(calc(var(--amp, 1) * -6px), calc(var(--amp, 1) * -8px));
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.32;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe,
+  .driftA,
+  .driftB,
+  .pulse {
+    animation: none !important;
+  }
+
+  .pulse {
+    opacity: 0.16;
+    transform: scale(0.74);
+  }
+}

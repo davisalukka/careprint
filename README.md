@@ -23,7 +23,10 @@ cruelty-free.
 The local MVP is functional and browser-verified. It includes:
 
 - Overview, Analytics, and Baseline dashboard views.
-- An interactive score ring and Analytics SVG dial.
+- A living, animated "careprint" visual whose lobes react in real time to the
+  cruelty vectors you pick (servings and sources), on both the Overview card
+  and the Baseline editor.
+- An Analytics SVG dial.
 - Breakdown bars, a weekly trend chart/table, and scenario comparison cards.
 - Frequency controls and source selectors that recalculate the estimate.
 - Maneuver preview plus `Apply & save` behavior.
@@ -67,6 +70,13 @@ under `careprint:profile`.
 - `src/DemoPage.tsx` — demo shell with a fixed local user.
 - `src/dashboard/DashboardClient.tsx` — client state, views, controls,
   maneuver application, and `localStorage` persistence.
+- `src/dashboard/FootprintVisual.tsx` — the living careprint: an animated,
+  organic SVG where each cruelty vector is a lobe that grows, heats, calms, or
+  shrinks to a seed as servings and sources change. Rendered on the Overview
+  score card (reacting to maneuver previews) and beside the Baseline controls
+  (reacting live to every input).
+- `src/dashboard/FootprintVisual.module.css` — visual-specific animation and
+  layout styles, including `prefers-reduced-motion` handling.
 - `src/dashboard/AnalyticsPanel.tsx` — accessible dial, breakdown, trend, and
   scenario-comparison views.
 - `src/dashboard/AnalyticsPanel.module.css` — Analytics-specific responsive
