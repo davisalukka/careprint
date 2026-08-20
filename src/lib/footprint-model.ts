@@ -124,12 +124,16 @@ export function makeScenarios(profile: Profile): Scenario[] {
   if (eggsAlreadyPasture) eggMove.servings.eggs = Math.max(0, eggMove.servings.eggs - 1);
   else eggMove.sources.eggs = "pasture";
 
-  return [
+  // Annotated so the literal `tone` values narrow to Scenario's union
+  // instead of widening to string.
+  const scenarios: Scenario[] = [
     { id: "beef-less", title: "Make beef occasional", description: "Replace one serving with beans, lentils, or tofu.", cost: "Usually saves money", icon: "✦", tone: "coral", profile: beefLess },
     { id: "salmon-less", title: "Make salmon a treat", description: "Keep the ocean-aware choice, just make it occasional.", cost: "Usually saves $", icon: "≈", tone: "mint", profile: salmonLess },
     { id: "eggs-better", title: eggsAlreadyPasture ? "Use one less egg dozen" : "Choose pasture-raised eggs", description: eggsAlreadyPasture ? "The next small lever after your strong sourcing choice." : "A high-confidence sourcing upgrade for the same recipe.", cost: eggsAlreadyPasture ? "Saves a little" : "Small weekly uplift", icon: "○", tone: "yellow", profile: eggMove },
     { id: "milk-plant", title: "Use plant milk every day", description: "Keep dairy for the moments where it matters most.", cost: "Often costs less", icon: "⌁", tone: "mint", profile: milkPlant },
-  ].sort((a, b) => calculateScore(a.profile) - calculateScore(b.profile));
+  ];
+
+  return scenarios.sort((a, b) => calculateScore(a.profile) - calculateScore(b.profile));
 }
 
 export function buildBreakdown(profile: Profile): BreakdownPoint[] {

@@ -32,6 +32,9 @@ const VIEW_OPTIONS: Array<{ id: ViewKey; label: string; helper: string }> = [
   { id: "baseline", label: "Baseline", helper: "Tune your inputs" },
 ];
 
+// Autosave target for the demo session. Nothing leaves the browser.
+const STORAGE_KEY = "careprint:profile";
+
 export function DashboardClient({ user, demoMode = false }: { user: User; demoMode?: boolean }) {
   const [profile, setProfile] = useState<Profile>(cloneProfile(DEFAULT_PROFILE));
   const [loaded, setLoaded] = useState(demoMode);
@@ -49,39 +52,17 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
   const bestNextScore = scenarios.length ? calculateScore(scenarios[0].profile) : score;
 
   useEffect(() => {
-    if (demoMode) return;
-
-    let active = true;
-    fetch("/api/profile")
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Unable to load profile");
-        return response.json() as Promise<{ profile?: Profile | null }>;
-      })
-      .then((payload) => {
-        if (!active) return;
-        if (payload.profile?.servings && payload.profile.sources) {
-          setProfile({
-            servings: { ...DEFAULT_PROFILE.servings, ...payload.profile.servings },
-            sources: { ...DEFAULT_PROFILE.sources, ...payload.profile.sources },
-          });
-        }
-        setLoaded(true);
-        setSyncState("saved");
-      })
-      .catch(() => {
-        if (!active) return;
-        setLoaded(true);
-        setSyncState("error");
-      });
-
-    return () => { active = false; };
-  }, [demoMode]);
+    const stored = readStoredProfile();
+    if (stored) setProfile(stored);
+    setLoaded(true);
+    setSyncState("saved");
+  }, []);
 
   useEffect(() => {
     if (!loaded || syncState !== "dirty") return;
-    const timer = window.setTimeout(() => { void persistProfile(profile, setSyncState, demoMode); }, 850);
+    const timer = window.setTimeout(() => { persistProfile(profile, setSyncState); }, 850);
     return () => window.clearTimeout(timer);
-  }, [profile, loaded, syncState, demoMode]);
+  }, [profile, loaded, syncState]);
 
   function changeServing(key: FoodKey, value: number) {
     setProfile((current) => updateProfile(current, key, { servings: value }));
@@ -112,14 +93,19 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
     tone: toneForFood(item.key),
   }));
   const analyticsTrend = trend.map((point) => ({ id: point.label, label: point.label, value: point.score, helper: point.note }));
-  const analyticsScenarios = scenarios.map((scenario) => ({
-    id: scenario.id,
-    label: scenario.title,
-    score: calculateScore(scenario.profile),
-    description: scenario.description,
-    detail: scenario.cost,
-    tone: scenario.tone === "coral" ? "coral" : scenario.tone === "yellow" ? "yellow" : "mint",
-  }));
+  const analyticsScenarios = scenarios.map((scenario) => {
+    // Annotated so the ternary narrows to AnalyticsTone rather than string.
+    const tone: AnalyticsTone =
+      scenario.tone === "coral" ? "coral" : scenario.tone === "yellow" ? "yellow" : "mint";
+    return {
+      id: scenario.id,
+      label: scenario.title,
+      score: calculateScore(scenario.profile),
+      description: scenario.description,
+      detail: scenario.cost,
+      tone,
+    };
+  });
 
   return (
     <>
@@ -196,7 +182,7 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
             <div><span className="label-caps">YOUR BASELINE</span><h2 id="profile-heading">What’s in a normal week?</h2><p>These four inputs drive the estimate. Use the dials, then save a baseline when it feels like a fair description of your week.</p></div>
             <div className="baseline-summary"><span><strong>{score}</strong><small>current score</small></span><span><strong>{plantShare}%</strong><small>plant-forward</small></span><span><strong>{FOOD_KEYS.reduce((total, key) => total + profile.servings[key], 0)}</strong><small>tracked choices</small></span></div>
             {FOOD_KEYS.map((key) => { const meta = FOOD_META[key]; return <div className="profile-row" key={key}><div className="profile-label"><strong>{meta.label}</strong><span>{formatServing(profile.servings[key], meta.unit.split(" ")[0])}</span></div><div className="profile-control"><label className="sr-only" htmlFor={`${key}-servings`}>{meta.label} {meta.unit}</label><input id={`${key}-servings`} type="range" min="0" max="3" step="1" value={profile.servings[key]} onChange={(event) => changeServing(key, Number(event.target.value))} /><output htmlFor={`${key}-servings`}>{profile.servings[key]}</output></div><label className="sr-only" htmlFor={`${key}-source`}>{meta.label} source</label><select id={`${key}-source`} className="profile-select" value={profile.sources[key]} onChange={(event) => changeSource(key, event.target.value as SourceKey)}>{meta.sources.map((source) => <option key={source.key} value={source.key}>{source.label}</option>)}</select></div>; })}
-            <button className="button button-primary button-wide" type="button" onClick={() => void persistProfile(profile, setSyncState, demoMode)}>Save my baseline</button>
+            <button className="button button-primary button-wide" type="button" onClick={() => persistProfile(profile, setSyncState)}>Save my baseline</button>
             <p className="save-note">{demoMode ? "This demo keeps your changes in the current session only." : "Your estimate is private to your account. Vendor links are labeled so you can decide whether they’re useful."}</p>
           </section>
           <section className="dashboard-card section-card method-card" id="method" aria-labelledby="method-heading"><div className="method-copy"><span className="label-caps">THE METHOD, IN PLAIN ENGLISH</span><h2 id="method-heading">A transparent estimate beats a magic number.</h2><p>Careprint v0.2 combines how often a choice shows up with a directional welfare-pressure factor for the source. Charts and forecasts are explainable views over that same local model.</p></div><div className="method-formula"><div className="formula-line"><span>frequency</span> × <span>welfare signal</span> = <strong>weekly estimate</strong></div><div className="formula-line"><span>your baseline</span> − <span>one maneuver</span> = <strong>new estimate</strong></div><p className="formula-caption">Lower is kinder. No vendor can pay to change the math. This is an educational estimate, not a certification or a complete measure of animal suffering.</p></div></section>
@@ -206,18 +192,28 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
   );
 }
 
-async function persistProfile(profile: Profile, setSyncState: (state: SyncState) => void, demoMode = false) {
-  if (demoMode) {
-    setSyncState("saved");
-    return;
-  }
-  setSyncState("loading");
+function persistProfile(profile: Profile, setSyncState: (state: SyncState) => void) {
   try {
-    const response = await fetch("/api/profile", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ profile }) });
-    if (!response.ok) throw new Error("Unable to save profile");
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
     setSyncState("saved");
   } catch {
+    // Private-mode browsers can reject writes; the session still works in memory.
     setSyncState("error");
+  }
+}
+
+function readStoredProfile(): Profile | null {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<Profile>;
+    if (!parsed?.servings || !parsed?.sources) return null;
+    return {
+      servings: { ...DEFAULT_PROFILE.servings, ...parsed.servings },
+      sources: { ...DEFAULT_PROFILE.sources, ...parsed.sources },
+    };
+  } catch {
+    return null;
   }
 }
 

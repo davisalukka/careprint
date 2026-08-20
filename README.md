@@ -27,15 +27,15 @@ The local MVP is functional and browser-verified. It includes:
 - Breakdown bars, a weekly trend chart/table, and scenario comparison cards.
 - Frequency controls and source selectors that recalculate the estimate.
 - Maneuver preview plus `Apply & save` behavior.
-- Local autosave behavior for the demo session.
+- Baseline autosave to `localStorage`.
 - Local-only vendor catalog, availability, subscription, and affiliate-click
   stubs.
-- A production-style ChatGPT sign-in path for `/dashboard`.
-- A local-only `/demo` route that does not call external services.
+- A `/demo` route that does not call external services.
 
-The hosted Sites project has been created, but it is not deployed yet. The
-hosting metadata is in `.openai/hosting.json`. The host still needs its
-configured source branch populated before a version can be saved and deployed.
+Careprint is a static site deployed to GitHub Pages at
+<https://davisalukka.github.io/careprint/>. It is a plain Vite + React build:
+every page is a real HTML file, there is no server, and no request leaves the
+browser. See [Deploying](#deploying).
 
 The GitHub repository associated with this project is
 [`davisalukka/careprint`](https://github.com/davisalukka/careprint). This new
@@ -47,47 +47,40 @@ next owner should initialize Git here and push the desired history.
 | Route | Purpose |
 | --- | --- |
 | `/` | Public Careprint landing page. |
-| `/demo` | Local-only interactive demo. In production it redirects to sign-in. |
-| `/dashboard` | ChatGPT-sign-in-gated account dashboard. |
-| `/api/profile` | Profile load/save boundary. Currently uses an in-memory local stub. |
-| `/api/stubs?kind=vendors` | Local vendor offers and catalog fixtures. |
-| `/api/stubs?kind=availability` | Local inventory/availability fixtures. |
-| `/api/stubs?kind=subscriptions` | Local subscription fixtures. |
-| `POST /api/stubs` | Records a local `affiliate_click` event; it never redirects externally. |
+| `/demo` | The interactive dashboard, running entirely in the browser. |
+
+Both are emitted as real static files (`dist/index.html` and
+`dist/demo/index.html`), so deep links resolve without a client-side router or
+a `404.html` rewrite.
+
+There is no API. The dashboard reads its vendor fixtures directly from
+`src/lib/integration-stubs.ts` and autosaves the baseline to `localStorage`
+under `careprint:profile`.
 
 ## Architecture map
 
 ### Product UI
 
-- `app/page.tsx` — public landing page and product promise.
-- `app/demo/page.tsx` — demo shell with a fake local user.
-- `app/dashboard/page.tsx` — authenticated dashboard shell.
-- `app/dashboard/DashboardClient.tsx` — client state, views, controls,
-  maneuver application, and persistence orchestration.
-- `app/dashboard/AnalyticsPanel.tsx` — accessible dial, breakdown, trend, and
+- `index.html` / `demo/index.html` — the two static entry documents.
+- `src/main-landing.tsx` / `src/main-demo.tsx` — React roots for each page.
+- `src/LandingPage.tsx` — public landing page and product promise.
+- `src/DemoPage.tsx` — demo shell with a fixed local user.
+- `src/dashboard/DashboardClient.tsx` — client state, views, controls,
+  maneuver application, and `localStorage` persistence.
+- `src/dashboard/AnalyticsPanel.tsx` — accessible dial, breakdown, trend, and
   scenario-comparison views.
-- `app/dashboard/AnalyticsPanel.module.css` — Analytics-specific responsive
+- `src/dashboard/AnalyticsPanel.module.css` — Analytics-specific responsive
   styling.
-- `app/dashboard/MarketplacePanel.tsx` — local partner cards and stubbed click
-  events.
-- `app/globals.css` — landing page and dashboard design system/styles.
+- `src/dashboard/MarketplacePanel.tsx` — partner cards read from the local
+  fixtures, with in-memory click events.
+- `src/globals.css` — landing page and dashboard design system/styles.
+- `src/paths.ts` — base-path-aware internal links.
 
 ### Domain model
 
-- `app/lib/footprint-model.ts` — shared types and deterministic model logic.
-- `app/lib/profile-stub.ts` — in-memory profile persistence seam.
-- `app/lib/integration-stubs.ts` — vendor, availability, subscription, and
+- `src/lib/footprint-model.ts` — shared types and deterministic model logic.
+- `src/lib/integration-stubs.ts` — vendor, availability, subscription, and
   affiliate-event fixtures.
-
-### Server boundaries
-
-- `app/api/profile/route.ts` — validates profile payloads and reads/writes the
-  local profile stub. It still uses the real ChatGPT identity boundary when the
-  authenticated dashboard is used.
-- `app/api/stubs/route.ts` — exposes the local integration fixtures and accepts
-  click events.
-- `app/chatgpt-auth.ts` — Sign in with ChatGPT helper boundary supplied by the
-  Sites/vinext environment.
 
 ## The scoring model
 
@@ -110,7 +103,7 @@ plant-based source selection has a zero animal-choice signal for that category.
 The plant-forward percentage is based on the source selections and quantities,
 not only on whether the quantity is zero.
 
-Important model functions live in `app/lib/footprint-model.ts`:
+Important model functions live in `src/lib/footprint-model.ts`:
 
 - `calculateScore(profile)` — returns the bounded 0–100 directional estimate.
 - `calculatePlantShare(profile)` — returns the plant-forward percentage.
@@ -129,16 +122,12 @@ Everything that could create an external dependency is stubbed for the MVP:
 - Vendor offers are local fixtures.
 - Availability and subscriptions are local fixtures.
 - Partner clicks are recorded in memory and never leave the app.
-- Profile persistence is local in memory.
-- D1 and R2 are intentionally unset in `.openai/hosting.json`.
+- Profile persistence is the browser's own `localStorage`.
 
 When real services are introduced, preserve these boundaries. Replace the
-implementation behind the existing route/module contracts rather than mixing
-vendor SDK calls into scoring or UI components.
-
-The one intentional production boundary is ChatGPT identity. `/dashboard`
-requires the platform sign-in flow; `/demo` bypasses it only for local
-development and uses a fake `demo-user`.
+implementation behind the existing module contracts rather than mixing vendor
+SDK calls into scoring or UI components. Anything needing a secret or a
+per-user record also needs a server, which a static host cannot provide.
 
 ## Affiliate and ethical guardrails
 
@@ -166,44 +155,65 @@ npm run dev
 
 Then open:
 
-- `http://localhost:3000/` for the landing page.
-- `http://localhost:3000/demo` for the interactive local demo.
+- `http://localhost:5173/` for the landing page.
+- `http://localhost:5173/demo/` for the interactive demo.
+
+The dev server runs from `/`, while the deployed site is served from
+`/careprint/`. Links use Vite's `BASE_URL` so both work from the same source.
 
 Useful checks:
 
 ```bash
-npm run build
+npm run build   # typechecks, then builds to dist/
 npm run lint
 npm test
+npm run preview # serve the built site locally
 ```
 
-`npm test` builds the app and runs the rendered-source checks in
-`tests/rendered-html.test.mjs`.
+`npm test` builds the site and runs the checks in
+`tests/rendered-html.test.mjs`, which cover the product copy, the local-only
+data boundaries, and the Pages requirements of the build output.
 
-## Hosting handoff
+## Deploying
 
-The intended publishing sequence is:
+The site deploys to GitHub Pages from `.github/workflows/deploy.yml` on every
+push to `main`. The workflow typechecks, lints, builds, and publishes `dist/`
+using the standard `actions/deploy-pages` flow.
 
-1. Initialize Git in `/Users/davis/Documents/Careprint`.
-2. Review the files and push the desired source to the GitHub repository.
-3. Populate the hosting provider's configured source branch for the Sites
-   project represented by `.openai/hosting.json`.
-4. Build and package the exact source state.
-5. Save a Sites version and deploy it.
-6. Set access to a shareable public URL if the goal is to show friends outside
-   the workspace.
-7. Verify `/`, `/demo`, `/api/stubs?kind=vendors`, and the key dashboard flows
-   on the deployed URL.
+One-time repository setup:
 
-Pushing to GitHub and publishing to Sites are separate source-control steps in
-the current hosting setup. Do not assume that a GitHub push alone creates a
-live Sites deployment.
+1. The repository must be public, or on a plan that includes Pages for private
+   repositories.
+2. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+
+No tokens or secrets are needed — the workflow authenticates with the built-in
+`GITHUB_TOKEN`.
+
+### The base path
+
+Pages serves a project site from `/<repo>/`, so the bundle is built with
+`base: "/careprint/"` (`vite.config.ts`). Internal links read
+`import.meta.env.BASE_URL` rather than hardcoding it.
+
+If you later move to a user site (`davisalukka.github.io`) or a custom domain,
+the site is served from the root instead — build with `BASE_PATH=/` and no
+other change is needed.
+
+`public/.nojekyll` stops GitHub from running Jekyll over the output, which would
+otherwise strip directories that Vite emits.
+
+### What a static host cannot do
+
+The earlier ChatGPT sign-in flow, the `/dashboard` route, and the `/api/*`
+handlers all required a server and were removed. `/demo` carries the full
+dashboard UI instead, backed by local fixtures and `localStorage`. Restoring
+per-user accounts means reintroducing a server and a host that can run one.
 
 ## Recommended next work
 
-1. Finish the first public Sites deployment and verify it from an anonymous
-   browser session.
-2. Replace `app/lib/profile-stub.ts` with durable per-user persistence.
+1. Verify the deployed Pages site from an anonymous browser session.
+2. Add durable per-user persistence. This needs a server and a host that can
+   run one, so it is the change that would move the site off GitHub Pages.
 3. Add real check-in history so the Analytics trend is no longer simulated.
 4. Define and document the welfare-signal methodology with evidence and an
    uncertainty/assumption layer.
@@ -214,10 +224,15 @@ live Sites deployment.
 7. Add unit and behavior coverage for score boundaries, plant-source handling,
    user isolation, maneuver saves, and stubbed partner events.
 
-## Starter references
+## Stack
 
-This app uses [vinext](https://github.com/cloudflare/vinext) with React and
-Next-compatible routing. The original starter also contains optional Drizzle
-and D1 scaffolding under `db/`, `drizzle/`, and `examples/d1/`; those surfaces
-are not part of the active local MVP until durable persistence is intentionally
-introduced.
+- [Vite](https://vite.dev/) for the build, with
+  [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react).
+- React 19, with no framework router: each route is its own HTML entry.
+- Tailwind's preflight via `@tailwindcss/postcss`; all component styling is
+  hand-written CSS in `src/globals.css`.
+
+The project previously ran on [vinext](https://github.com/cloudflare/vinext)
+with Next-compatible routing, Cloudflare Workers, and optional Drizzle/D1
+scaffolding. Those were removed when the site moved to GitHub Pages, which
+serves static files only. They remain in the Git history.
