@@ -36,6 +36,8 @@ The local MVP is functional and browser-verified. It includes:
 The hosted Sites project has been created, but it is not deployed yet. The
 hosting metadata is in `.openai/hosting.json`. The host still needs its
 configured source branch populated before a version can be saved and deployed.
+See [Deploying](#deploying) for the free Cloudflare Workers path, which does not
+depend on Sites.
 
 The GitHub repository associated with this project is
 [`davisalukka/careprint`](https://github.com/davisalukka/careprint). This new
@@ -198,6 +200,61 @@ The intended publishing sequence is:
 Pushing to GitHub and publishing to Sites are separate source-control steps in
 the current hosting setup. Do not assume that a GitHub push alone creates a
 live Sites deployment.
+
+## Deploying
+
+### Why not GitHub Pages
+
+GitHub Pages serves static files only. Careprint renders on the server: `/` and
+`/dashboard` call `headers()` through `app/chatgpt-auth.ts`, and `/api/profile`
+and `/api/stubs` are request handlers. A static export would drop all of it, so
+Pages is not a viable host for this app.
+
+### Cloudflare Workers (free tier)
+
+The app already targets Workers — `worker/index.ts` is the entry point and
+`@cloudflare/vite-plugin` is wired up in `vite.config.ts`. The Workers free plan
+covers basic dev usage.
+
+One-time setup:
+
+1. `npx wrangler login` (or set `CLOUDFLARE_API_TOKEN` from an **Edit Cloudflare
+   Workers** token for non-interactive use).
+2. Set `CLOUDFLARE_ACCOUNT_ID`, or add `account_id` to the deploy config.
+
+Then:
+
+```bash
+npm run deploy
+```
+
+That builds and publishes to `careprint.<your-subdomain>.workers.dev`.
+
+Deploy settings — worker name, bindings, compatibility date — live in the
+committed `wrangler.jsonc`. `vinext deploy` writes that file only when it is
+missing, so edits there are preserved. The separate `dist/server/wrangler.json`
+is a build artifact generated from `localBindingConfig` in `vite.config.ts` and
+drives `npm run dev`; it is not the deploy config. Keep the worker name in sync
+across both if you change it.
+
+Pushes to `main` deploy automatically via `.github/workflows/deploy.yml`, which
+needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
+
+### Authentication on non-Sites hosts
+
+`app/chatgpt-auth.ts` reads `oai-authenticated-user-*` request headers that the
+Sites proxy injects. Nothing sets them on Workers, so `/dashboard` redirects to
+`/signin-with-chatgpt`, which only exists behind Sites. On a Workers deploy,
+expect `/` and the API routes to work and `/dashboard` to stay gated until that
+auth layer is replaced.
+
+So that a Workers deploy is explorable, `npm run deploy` sets
+`CAREPRINT_ENABLE_DEMO=1`, which un-gates `/demo` — the full dashboard UI backed
+by local stubs, calling no external services. The flag is inlined at build time
+via `define` in `vite.config.ts`; workerd does not populate `process.env` from
+Wrangler `vars`, so a runtime lookup would silently read as undefined. Builds
+that leave the flag unset keep the original production gating, so Sites builds
+are unaffected.
 
 ## Recommended next work
 

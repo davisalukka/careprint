@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function DemoPage() {
-  if (process.env.NODE_ENV === "production") redirect("/signin-with-chatgpt?return_to=%2Fdashboard");
+  const demoEnabled = process.env.CAREPRINT_ENABLE_DEMO === "1";
+  if (!demoEnabled && process.env.NODE_ENV === "production") redirect("/signin-with-chatgpt?return_to=%2Fdashboard");
 
   const demoUser = { userId: "demo-user", displayName: "Demo User", email: "demo@careprint.local" };
 
