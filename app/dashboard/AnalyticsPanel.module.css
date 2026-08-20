@@ -1,0 +1,709 @@
+.panel {
+  --analytics-paper: var(--paper, #f6f1e8);
+  --analytics-ink: var(--ink, #193024);
+  --analytics-muted: var(--muted, #6d786f);
+  --analytics-line: var(--line, #ded8cc);
+  --analytics-white: var(--white, #fffdf9);
+  --analytics-mint: var(--mint, #dcecdf);
+  --analytics-mint-strong: var(--mint-strong, #b5d8c2);
+  --analytics-sage: var(--sage, #50735a);
+  --analytics-coral: var(--coral, #e27352);
+  --analytics-coral-deep: var(--coral-deep, #c65438);
+  --analytics-yellow: var(--yellow, #e8bd58);
+  background: var(--analytics-white);
+  border: 1px solid var(--analytics-line);
+  border-radius: 14px;
+  color: var(--analytics-ink);
+  padding: 30px 31px 31px;
+}
+
+.panelHeader {
+  align-items: end;
+  display: flex;
+  gap: 28px;
+  justify-content: space-between;
+}
+
+.eyebrow,
+.overline {
+  color: var(--analytics-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.eyebrowDot,
+.statusDot {
+  background: var(--analytics-coral);
+  border-radius: 99px;
+  display: inline-block;
+  height: 6px;
+  width: 6px;
+}
+
+.panelTitle {
+  font-size: clamp(27px, 3vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+  margin: 9px 0 0;
+}
+
+.panelDescription {
+  color: var(--analytics-muted);
+  font-size: 11px;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 310px;
+}
+
+.topGrid,
+.bottomGrid {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.topGrid {
+  grid-template-columns: minmax(0, 1.16fr) minmax(300px, 0.84fr);
+}
+
+.bottomGrid {
+  grid-template-columns: minmax(0, 1.24fr) minmax(300px, 0.76fr);
+}
+
+.card {
+  background: var(--analytics-paper);
+  border: 1px solid var(--analytics-line);
+  border-radius: 12px;
+  min-width: 0;
+}
+
+.dialCard,
+.breakdownCard,
+.trendCard,
+.scenarioCard {
+  padding: 24px;
+}
+
+.cardHeader {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.cardHeader h3 {
+  font-size: 18px;
+  letter-spacing: -0.045em;
+  margin: 7px 0 0;
+}
+
+.cardHint {
+  color: var(--analytics-muted);
+  font-size: 9px;
+  padding-top: 2px;
+  white-space: nowrap;
+}
+
+.statusPill {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 9px;
+  font-weight: 700;
+  gap: 5px;
+  padding: 7px 9px;
+  white-space: nowrap;
+}
+
+.toneMint {
+  --analytics-tone: var(--analytics-sage);
+  --analytics-tone-bg: var(--analytics-mint);
+  background: var(--analytics-tone-bg);
+  color: var(--analytics-tone);
+}
+
+.toneCoral {
+  --analytics-tone: var(--analytics-coral-deep);
+  --analytics-tone-bg: #f6d8ce;
+  background: var(--analytics-tone-bg);
+  color: var(--analytics-tone);
+}
+
+.toneYellow {
+  --analytics-tone: #856a27;
+  --analytics-tone-bg: #f4dfa7;
+  background: var(--analytics-tone-bg);
+  color: var(--analytics-tone);
+}
+
+.toneSage {
+  --analytics-tone: var(--analytics-sage);
+  --analytics-tone-bg: #d5e5d7;
+  background: var(--analytics-tone-bg);
+  color: var(--analytics-tone);
+}
+
+.dialLayout {
+  align-items: center;
+  display: grid;
+  gap: 25px;
+  grid-template-columns: minmax(156px, 0.72fr) minmax(0, 1fr);
+  margin-top: 24px;
+}
+
+.dialVisual {
+  margin: 0 auto;
+  max-width: 206px;
+  position: relative;
+  width: 100%;
+}
+
+.dialSvg {
+  display: block;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+.dialTrack {
+  stroke: var(--analytics-mint);
+  stroke-width: 13;
+}
+
+.dialProgress {
+  stroke: var(--analytics-coral);
+  stroke-linecap: round;
+  stroke-width: 13;
+  transition: stroke-dashoffset 250ms ease;
+}
+
+.forecastMarker {
+  fill: var(--analytics-yellow);
+  stroke: var(--analytics-white);
+  stroke-width: 3;
+}
+
+.dialReadout {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  text-align: center;
+}
+
+.dialReadout strong {
+  font-size: clamp(42px, 5vw, 57px);
+  font-weight: 500;
+  letter-spacing: -0.09em;
+  line-height: 0.9;
+}
+
+.dialReadout > span {
+  color: var(--analytics-muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.dialReadout small {
+  color: var(--analytics-sage);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin-top: 9px;
+  text-transform: uppercase;
+}
+
+.dialCopy h4 {
+  font-size: 23px;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  margin: 0;
+}
+
+.dialCopy > p:not(.previewLabel) {
+  color: var(--analytics-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 11px 0 15px;
+}
+
+.previewLabel {
+  color: var(--analytics-coral-deep);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0 0 7px;
+  text-transform: uppercase;
+}
+
+.resetButton {
+  background: transparent;
+  border: 0;
+  color: var(--analytics-sage);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+  margin: 0 0 15px;
+  padding: 3px 0;
+}
+
+.resetButton:hover {
+  color: var(--analytics-coral-deep);
+}
+
+.forecastCard {
+  background: var(--analytics-white);
+  border: 1px solid var(--analytics-line);
+  border-radius: 9px;
+  margin-top: 18px;
+  padding: 13px 14px;
+}
+
+.forecastTopline {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.changeChip {
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 5px 7px;
+  white-space: nowrap;
+}
+
+.deltaPositive {
+  color: var(--analytics-sage);
+}
+
+.deltaNegative {
+  color: var(--analytics-coral-deep);
+}
+
+.changeChip.deltaPositive {
+  background: var(--analytics-mint);
+}
+
+.changeChip.deltaNegative {
+  background: #f6d8ce;
+}
+
+.forecastValue {
+  align-items: baseline;
+  display: flex;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.forecastValue strong {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.08em;
+  line-height: 1;
+}
+
+.forecastValue span {
+  color: var(--analytics-muted);
+  font-size: 10px;
+}
+
+.forecastLabel {
+  display: block;
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.forecastCard p {
+  color: var(--analytics-muted);
+  font-size: 9px;
+  line-height: 1.45;
+  margin: 5px 0 0;
+}
+
+.breakdownList {
+  display: grid;
+  gap: 18px;
+  margin-top: 29px;
+}
+
+.breakdownItem {
+  min-width: 0;
+}
+
+.breakdownMeta {
+  align-items: center;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+}
+
+.breakdownDot {
+  border-radius: 99px;
+  height: 8px;
+  width: 8px;
+}
+
+.breakdownLabel strong,
+.breakdownLabel span {
+  display: block;
+}
+
+.breakdownLabel strong {
+  font-size: 11px;
+}
+
+.breakdownLabel span {
+  color: var(--analytics-muted);
+  font-size: 9px;
+  margin-top: 3px;
+}
+
+.breakdownValue {
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.breakdownTrack {
+  background: var(--analytics-mint);
+  border-radius: 99px;
+  height: 7px;
+  margin: 9px 0 0 17px;
+  overflow: hidden;
+}
+
+.breakdownFill {
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transition: width 250ms ease;
+}
+
+.breakdownFill.toneMint,
+.breakdownDot.toneMint,
+.scenarioMarker.toneMint {
+  background: var(--analytics-sage);
+}
+
+.breakdownFill.toneCoral,
+.breakdownDot.toneCoral,
+.scenarioMarker.toneCoral {
+  background: var(--analytics-coral);
+}
+
+.breakdownFill.toneYellow,
+.breakdownDot.toneYellow,
+.scenarioMarker.toneYellow {
+  background: var(--analytics-yellow);
+}
+
+.breakdownFill.toneSage,
+.breakdownDot.toneSage,
+.scenarioMarker.toneSage {
+  background: var(--analytics-sage);
+}
+
+.cardFootnote {
+  border-top: 1px solid var(--analytics-line);
+  color: var(--analytics-muted);
+  font-size: 9px;
+  line-height: 1.45;
+  margin: 23px 0 0;
+  padding-top: 13px;
+}
+
+.trendCard,
+.scenarioCard {
+  min-height: 315px;
+}
+
+.trendFrame {
+  margin-top: 18px;
+  overflow: hidden;
+}
+
+.trendSvg {
+  display: block;
+  height: auto;
+  max-height: 235px;
+  overflow: visible;
+  width: 100%;
+}
+
+.trendGridLine {
+  stroke: var(--analytics-line);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--analytics-muted);
+  font-size: 9px;
+  text-anchor: start;
+}
+
+.trendArea {
+  fill: var(--analytics-mint);
+  opacity: 0.75;
+}
+
+.trendLine {
+  fill: none;
+  stroke: var(--analytics-coral);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.trendPointHalo {
+  fill: var(--analytics-white);
+  stroke: var(--analytics-coral);
+  stroke-width: 1;
+}
+
+.trendPoint {
+  fill: var(--analytics-coral);
+  stroke: var(--analytics-white);
+  stroke-width: 2;
+}
+
+.trendFooter {
+  color: var(--analytics-muted);
+  display: flex;
+  font-size: 9px;
+  justify-content: space-between;
+  margin: -4px 0 0 29px;
+}
+
+.trendFooter span:nth-child(2) {
+  color: var(--analytics-sage);
+  font-weight: 800;
+}
+
+.scenarioList {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.scenarioRow {
+  border: 1px solid var(--analytics-line);
+  border-radius: 9px;
+  overflow: hidden;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.scenarioRow:hover,
+.scenarioRowSelected {
+  background: var(--analytics-white);
+  border-color: var(--analytics-mint-strong);
+}
+
+.scenarioButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  padding: 11px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.scenarioButton:hover .scenarioCopy strong {
+  color: var(--analytics-coral-deep);
+}
+
+.scenarioButton:focus-visible {
+  outline: 3px solid rgba(226, 115, 82, 0.42);
+  outline-offset: -3px;
+}
+
+.scenarioMarker {
+  align-items: center;
+  border-radius: 7px;
+  color: var(--analytics-white);
+  display: inline-flex;
+  font-size: 13px;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.scenarioCopy {
+  min-width: 0;
+}
+
+.scenarioCopy strong,
+.scenarioCopy span {
+  display: block;
+}
+
+.scenarioCopy strong {
+  font-size: 10px;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scenarioCopy span {
+  color: var(--analytics-muted);
+  font-size: 9px;
+  line-height: 1.35;
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scenarioScore {
+  align-items: baseline;
+  display: inline-flex;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.scenarioScore strong {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+}
+
+.scenarioScore span {
+  color: var(--analytics-muted);
+  font-size: 8px;
+}
+
+.scenarioDelta {
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.scenarioDetail {
+  border-top: 1px solid var(--analytics-line);
+  color: var(--analytics-muted);
+  display: block;
+  font-size: 9px;
+  line-height: 1.4;
+  padding: 8px 12px 9px 45px;
+}
+
+.emptyState {
+  align-items: center;
+  background: var(--analytics-white);
+  border: 1px dashed var(--analytics-line);
+  border-radius: 9px;
+  color: var(--analytics-muted);
+  display: flex;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 23px;
+  min-height: 130px;
+  padding: 18px;
+}
+
+.srOnly {
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (max-width: 960px) {
+  .topGrid,
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialLayout {
+    grid-template-columns: minmax(170px, 0.55fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .panel {
+    padding: 23px 20px 20px;
+  }
+
+  .panelHeader {
+    align-items: start;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .panelDescription {
+    max-width: 360px;
+  }
+
+  .dialCard,
+  .breakdownCard,
+  .trendCard,
+  .scenarioCard {
+    padding: 20px;
+  }
+
+  .dialLayout {
+    gap: 22px;
+    grid-template-columns: minmax(138px, 0.9fr) minmax(0, 1fr);
+  }
+
+  .dialCopy h4 {
+    font-size: 21px;
+  }
+
+  .scenarioButton {
+    gap: 8px;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+  }
+
+  .scenarioDelta {
+    grid-column: 2 / span 2;
+    margin-top: -3px;
+  }
+}
+
+@media (max-width: 430px) {
+  .dialLayout {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .dialVisual {
+    max-width: 184px;
+  }
+
+  .dialCopy {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialProgress,
+  .breakdownFill,
+  .scenarioRow {
+    transition: none;
+  }
+}
