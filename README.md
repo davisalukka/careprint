@@ -26,9 +26,10 @@ checkable, the second is not.
 The local MVP is functional and browser-verified. It includes:
 
 - Overview, Analytics, and Baseline dashboard views.
-- A living, animated "careprint" visual whose lobes react in real time to the
-  welfare vectors you pick (servings and sources), on both the Overview card
-  and the Baseline editor.
+- A living, animated "careprint" visual — one coherent ball of grains that
+  packs, grows, and heats toward opaque red as welfare vectors accumulate, and
+  dissolves toward a transparent shell as they drain — reacting in real time on
+  both the Overview card and the Baseline editor.
 - A six-category model (chicken, eggs, pork, beef, salmon, milk) with
   0–14 weekly frequencies, certification-mapped source tiers, and baseline
   presets (typical omnivore, reducetarian, pescatarian, plant-forward).
@@ -87,13 +88,14 @@ under `careprint:profile`.
 - `src/DemoPage.tsx` — demo shell with a fixed local user.
 - `src/dashboard/DashboardClient.tsx` — client state, views, controls,
   maneuver application, and `localStorage` persistence.
-- `src/dashboard/FootprintVisual.tsx` — the living careprint: an animated,
-  organic SVG where each welfare vector is a lobe that grows, heats, calms, or
-  shrinks to a seed as servings and sources change. Rendered on the Overview
-  score card (reacting to maneuver previews) and beside the Baseline controls
-  (reacting live to every input).
-- `src/dashboard/FootprintVisual.module.css` — visual-specific animation and
-  layout styles, including `prefers-reduced-motion` handling.
+- `src/dashboard/FootprintVisual.tsx` — the living careprint: a single
+  canvas-drawn ball of grains ("the Ember") whose size, density, heat, and
+  tremble track total weekly pressure, dissolving to a transparent shell at
+  zero. Rendered on the Overview score card (reacting to maneuver previews)
+  and beside the Baseline controls (reacting live to every input).
+- `src/dashboard/FootprintVisual.module.css` — visual-specific layout and
+  overlay styles, including `prefers-reduced-motion` handling (the canvas
+  honors it via `matchMedia`).
 - `src/dashboard/AnalyticsPanel.tsx` — accessible dial, breakdown, trend, and
   scenario-comparison views.
 - `src/dashboard/AnalyticsPanel.module.css` — Analytics-specific responsive

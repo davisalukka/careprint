@@ -289,7 +289,7 @@ export function DashboardClient({ user, demoMode = false }: { user: User; demoMo
           <aside className="dashboard-card baseline-visual-card" aria-labelledby="living-print-heading">
             <span className="label-caps">YOUR LIVING CAREPRINT</span>
             <h2 id="living-print-heading">Watch it respond.</h2>
-            <p>This is your week, drawn live. Each lobe is one welfare vector—it swells and quickens as pressure rises, settles as your sourcing gets kinder, and drops to a seed when a choice goes plant-based. Think of it as gardening: you’re growing a smaller, calmer print.</p>
+            <p>This is your whole week as one ball. Every vector you add packs more matter into it—it grows, heats toward red, and trembles under harsher sourcing. Kinder choices drain it back toward a clear, quiet shell. Zero is transparent.</p>
             <FootprintVisual profile={profile} showLegend />
             <button className="button button-ghost button-small share-button" type="button" onClick={shareProfile}>
               {shareState === "copied" ? "Link copied ✓" : shareState === "manual" ? "Link ready in the address bar" : "Share this print ↗"}
