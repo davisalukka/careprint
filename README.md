@@ -1,22 +1,25 @@
 # Careprint
 
 Careprint is an interactive food-choice dashboard for people who want to reduce
-their animal-cruelty footprint without pretending that one score can capture the
+their animal-welfare footprint without pretending that one score can capture the
 whole moral reality of food production.
 
 The product idea is simple:
 
-1. A person describes a normal week of beef, salmon, eggs, and milk.
+1. A person describes a normal week of chicken, eggs, pork, beef, salmon, and
+   milk.
 2. Careprint estimates directional welfare pressure from frequency and source.
-3. The dashboard identifies the lowest-hanging fruit.
-4. The person previews a maneuver, such as making beef occasional, before
+3. The dashboard ranks maneuvers by welfare gain per unit of effort.
+4. The person previews a maneuver, such as switching to certified eggs, before
    applying it to their baseline.
-5. The product can eventually recommend lower-footprint vendors through clearly
-   disclosed affiliate partnerships.
+5. The product can eventually recommend higher-welfare vendors through clearly
+   disclosed referral partnerships, starting from a curated unmonetized
+   directory.
 
-The estimate is educational and directional. It is not a certification, a
-universal ranking of suffering, or a claim that one source is definitively
-cruelty-free.
+The estimate is educational and directional. It is not a certification or a
+universal ranking of suffering. We use the comparative term "higher-welfare"
+throughout and never describe any product as "cruelty-free" — the first is
+checkable, the second is not.
 
 ## Current status
 
@@ -24,15 +27,24 @@ The local MVP is functional and browser-verified. It includes:
 
 - Overview, Analytics, and Baseline dashboard views.
 - A living, animated "careprint" visual whose lobes react in real time to the
-  cruelty vectors you pick (servings and sources), on both the Overview card
+  welfare vectors you pick (servings and sources), on both the Overview card
   and the Baseline editor.
-- An Analytics SVG dial.
-- Breakdown bars, a weekly trend chart/table, and scenario comparison cards.
-- Frequency controls and source selectors that recalculate the estimate.
-- Maneuver preview plus `Apply & save` behavior.
-- Baseline autosave to `localStorage`.
-- Local-only vendor catalog, availability, subscription, and affiliate-click
-  stubs.
+- A six-category model (chicken, eggs, pork, beef, salmon, milk) with
+  0–14 weekly frequencies, certification-mapped source tiers, and baseline
+  presets (typical omnivore, reducetarian, pescatarian, plant-forward).
+- A `/methodology` page rendered from the same weight table the score uses,
+  with cited sources, the certification taxonomy, uncertainty, FAQ, privacy,
+  and disclosure sections.
+- A directional uncertainty band displayed alongside every score.
+- Maneuvers ranked by welfare gain per unit of effort, each tagged with its
+  cost (💰 costs more / 🛒 different store / 🔁 habit change).
+- A real weekly-trend chart built from saved check-ins (one `localStorage`
+  snapshot per week) — no simulated history anywhere.
+- Share-by-link (profile encoded in the URL fragment) and JSON export/import.
+- An Analytics SVG dial, breakdown bars, and scenario comparison cards.
+- Baseline autosave to `localStorage`, with v1 profiles migrated on load.
+- A local-only curated vendor directory stub (KW/GTA pilot framing) with
+  per-card verification labels and adjacent disclosure.
 - A `/demo` route that does not call external services.
 
 Careprint is a static site deployed to GitHub Pages at
@@ -51,6 +63,7 @@ next owner should initialize Git here and push the desired history.
 | --- | --- |
 | `/` | Public Careprint landing page. |
 | `/demo` | The interactive dashboard, running entirely in the browser. |
+| `/methodology` | Every weight, its sources, uncertainty, privacy, and disclosure. |
 
 Both are emitted as real static files (`dist/index.html` and
 `dist/demo/index.html`), so deep links resolve without a client-side router or
@@ -64,14 +77,18 @@ under `careprint:profile`.
 
 ### Product UI
 
-- `index.html` / `demo/index.html` — the two static entry documents.
-- `src/main-landing.tsx` / `src/main-demo.tsx` — React roots for each page.
+- `index.html` / `demo/index.html` / `methodology/index.html` — the static
+  entry documents.
+- `src/main-landing.tsx` / `src/main-demo.tsx` / `src/main-methodology.tsx` —
+  React roots for each page.
 - `src/LandingPage.tsx` — public landing page and product promise.
+- `src/MethodologyPage.tsx` — the methodology page, rendered directly from the
+  model's weight table so the published numbers can never drift from the score.
 - `src/DemoPage.tsx` — demo shell with a fixed local user.
 - `src/dashboard/DashboardClient.tsx` — client state, views, controls,
   maneuver application, and `localStorage` persistence.
 - `src/dashboard/FootprintVisual.tsx` — the living careprint: an animated,
-  organic SVG where each cruelty vector is a lobe that grows, heats, calms, or
+  organic SVG where each welfare vector is a lobe that grows, heats, calms, or
   shrinks to a seed as servings and sources change. Rendered on the Overview
   score card (reacting to maneuver previews) and beside the Baseline controls
   (reacting live to every input).
@@ -92,7 +109,7 @@ under `careprint:profile`.
 - `src/lib/integration-stubs.ts` — vendor, availability, subscription, and
   affiliate-event fixtures.
 
-## The scoring model
+## The scoring model (v2)
 
 The model deliberately stays explainable:
 
@@ -101,29 +118,34 @@ weekly estimate = frequency × directional welfare signal
 new estimate    = current baseline − one maneuver
 ```
 
-The tracked categories are:
-
-- Beef
-- Salmon
-- Eggs
-- Milk
-
-Each category has a weekly quantity from 0 to 3 and a source selection. A
-plant-based source selection has a zero animal-choice signal for that category.
-The plant-forward percentage is based on the source selections and quantities,
-not only on whether the quantity is zero.
+The tracked categories are chicken, eggs, pork, beef, salmon, and milk, with
+weekly quantities from 0 to 14 and certification-mapped source tiers. The
+weights follow the per-serving ranking the welfare-economics literature keeps
+converging on — caged eggs ≈ broiler chicken > farmed fish > pork >> beef >
+milk — as a directional synthesis informed by the Welfare Footprint Project,
+Fish Welfare Initiative, and Rethink Priorities. The `/methodology` page
+renders the exact weight table from the model source with citations and
+caveats. A plant-based source selection has a zero animal-choice signal for
+that category; the plant-forward percentage counts those selections, not only
+zero quantities.
 
 Important model functions live in `src/lib/footprint-model.ts`:
 
 - `calculateScore(profile)` — returns the bounded 0–100 directional estimate.
+- `scoreBand(profile)` — the asymmetric uncertainty band shown in the UI.
 - `calculatePlantShare(profile)` — returns the plant-forward percentage.
-- `makeScenarios(profile)` — generates the available next maneuvers.
+- `makeScenarios(profile)` — generates maneuvers ranked by welfare gain per
+  unit of effort, each tagged cost / store / habit.
 - `buildBreakdown(profile)` — produces contribution data for the bars.
-- `buildTrend(profile)` — creates a deterministic simulated history for the
-  current baseline.
+- `recordCheckIn(history, score)` / `buildTrend(history)` — real weekly
+  check-ins (one `localStorage` snapshot per week). There is no simulated
+  history; with no check-ins the trend panel shows an empty state.
+- `normalizeProfile(value)` — migrates v1 baselines and validates imports.
+- `encodeProfile(profile)` / `decodeProfile(encoded)` — the share-link format.
 
-The trend is explicitly labeled simulated until real weekly check-ins exist.
-Do not present it as historical user data.
+Score-boundary and behavior tests for the model live in
+`tests/footprint-model.test.mjs` and run against the TypeScript source via
+Node's type stripping.
 
 ## Integration boundaries
 
@@ -144,12 +166,23 @@ per-user record also needs a server, which a static host cannot provide.
 These are product requirements, not optional copy:
 
 - Paid placement must never change score math or partner ranking.
-- Affiliate relationships must be disclosed near the partner cards.
-- Recommendations should explain why a vendor appears.
-- “Cruelty-free” should not be treated as a binary certification without a
-  defensible standard and evidence.
-- The score should remain directional and transparent about uncertainty.
-- Do not collect more personal food data than the product needs.
+- Referral relationships must be disclosed adjacent to the affected cards, in
+  plain language ("we may earn a referral fee if you order via this link or
+  code"), per Ad Standards Canada guidance and the Competition Act's
+  deceptive-marketing provisions.
+- The vendor section launches as a curated, unmonetized directory (one region
+  done well — KW/GTA) before any referral money is added.
+- Recommendations should explain why a vendor appears, using the verification
+  taxonomy on the methodology page (audited certifications > Canadian Organic >
+  unverified marketing claims).
+- Use "higher-welfare" consistently; never describe anything as "cruelty-free"
+  (a test enforces this).
+- The score must remain directional and transparent about uncertainty — the
+  band is part of the product, not a footnote.
+- Do not collect more personal food data than the product needs. A full privacy
+  policy must exist before the first server-side record (dietary data plus
+  postal code is more sensitive than it looks; PIPEDA applies the moment
+  accounts exist).
 - Real persistence must be isolated per authenticated user.
 
 ## Local development
@@ -221,18 +254,28 @@ per-user accounts means reintroducing a server and a host that can run one.
 
 ## Recommended next work
 
-1. Verify the deployed Pages site from an anonymous browser session.
-2. Add durable per-user persistence. This needs a server and a host that can
-   run one, so it is the change that would move the site off GitHub Pages.
-3. Add real check-in history so the Analytics trend is no longer simulated.
-4. Define and document the welfare-signal methodology with evidence and an
-   uncertainty/assumption layer.
-5. Add vendor verification, service-area, pickup, subscription, and pricing
-   data behind the existing stub contracts.
-6. Add privacy policy, affiliate disclosure, and an explanation of what the
-   score does and does not mean.
-7. Add unit and behavior coverage for score boundaries, plant-source handling,
-   user isolation, maneuver saves, and stubbed partner events.
+Market-shaped validation comes before more infrastructure:
+
+1. **Credibility test:** put the deployed demo in front of ~20 people from the
+   target segment and ask one question — "Do you believe this number, and
+   would it change what you buy?" If no, the fix is methodology, not features.
+2. **Vendor willingness test:** ask five Ontario vendors (a mix of box
+   services and direct farms) whether they'd pay per referred customer —
+   coupon-code referrals beat tracking links for farm-direct sellers, and
+   program availability must be verified directly, never assumed.
+3. Add privacy-respecting, cookie-free analytics (e.g., Plausible or
+   self-hosted Umami) so the validation tests are measurable. Requires an
+   account/domain decision, which is why it isn't wired in yet.
+4. Verify the deployed Pages site from an anonymous browser session.
+5. Consider a "worldview slider" (e.g., weight on fish sentience) that visibly
+   moves the score — the ambitious version of the uncertainty band.
+6. Add durable per-user persistence. This needs a server (the scaffolded-and-
+   removed Cloudflare Workers + D1 path is the cheapest), so it is the change
+   that would move the site off GitHub Pages.
+7. Replace directory placeholders with verified vendors (visit them), real
+   service areas (FSA-prefix mapping, KW/GTA first), and pricing.
+8. Run a Canadian trademark search on "Careprint" before investing further in
+   the brand.
 
 ## Stack
 

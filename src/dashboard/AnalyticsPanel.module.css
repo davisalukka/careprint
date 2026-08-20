@@ -10,6 +10,8 @@
   --analytics-coral: var(--coral, #e27352);
   --analytics-coral-deep: var(--coral-deep, #c65438);
   --analytics-yellow: var(--yellow, #e8bd58);
+  --analytics-ochre: #b98a4f;
+  --analytics-rose: #c98b9e;
   background: var(--analytics-white);
   border: 1px solid var(--analytics-line);
   border-radius: 14px;
@@ -148,6 +150,20 @@
 .toneSage {
   --analytics-tone: var(--analytics-sage);
   --analytics-tone-bg: #d5e5d7;
+  background: var(--analytics-tone-bg);
+  color: var(--analytics-tone);
+}
+
+.toneOchre {
+  --analytics-tone: #7c5a2e;
+  --analytics-tone-bg: #ecdcbe;
+  background: var(--analytics-tone-bg);
+  color: var(--analytics-tone);
+}
+
+.toneRose {
+  --analytics-tone: #8d5566;
+  --analytics-tone-bg: #efd9df;
   background: var(--analytics-tone-bg);
   color: var(--analytics-tone);
 }
@@ -414,6 +430,18 @@
 .breakdownDot.toneSage,
 .scenarioMarker.toneSage {
   background: var(--analytics-sage);
+}
+
+.breakdownFill.toneOchre,
+.breakdownDot.toneOchre,
+.scenarioMarker.toneOchre {
+  background: var(--analytics-ochre);
+}
+
+.breakdownFill.toneRose,
+.breakdownDot.toneRose,
+.scenarioMarker.toneRose {
+  background: var(--analytics-rose);
 }
 
 .cardFootnote {

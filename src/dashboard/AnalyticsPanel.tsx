@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import styles from "./AnalyticsPanel.module.css";
 
-export type AnalyticsTone = "coral" | "mint" | "yellow" | "sage";
+export type AnalyticsTone = "coral" | "mint" | "yellow" | "sage" | "ochre" | "rose";
 
 export type AnalyticsBreakdownItem = {
   id: string;
@@ -77,6 +77,8 @@ const toneClasses: Record<AnalyticsTone, string> = {
   mint: styles.toneMint,
   yellow: styles.toneYellow,
   sage: styles.toneSage,
+  ochre: styles.toneOchre,
+  rose: styles.toneRose,
 };
 
 function clamp(value: number, minimum: number, maximum: number): number {
@@ -206,7 +208,7 @@ export function AnalyticsPanel({
           <div className={styles.cardHeader}>
             <div>
               <span className={styles.overline}>YOUR ESTIMATE</span>
-              <h3 id={dialTitleId}>Cruelty footprint</h3>
+              <h3 id={dialTitleId}>Welfare footprint</h3>
             </div>
             <span className={`${styles.statusPill} ${styles.toneMint}`}>
               <span className={styles.statusDot} aria-hidden="true" />{selectedScenario ? "Preview" : "On track"}
@@ -322,7 +324,7 @@ export function AnalyticsPanel({
               <span className={styles.overline}>WEEKLY TREND</span>
               <h3 id={trendTitleId}>Is the pattern moving?</h3>
             </div>
-            {trend.points.length ? <span className={styles.cardHint}>{trend.points.length} checks</span> : null}
+            {trend.points.length ? <span className={styles.cardHint}>{trend.points.length} {trend.points.length === 1 ? "check-in" : "check-ins"}</span> : null}
           </div>
 
           {trend.points.length ? (
@@ -334,7 +336,7 @@ export function AnalyticsPanel({
                   role="img"
                   aria-labelledby={`${trendTitleId} ${trendDescriptionId}`}
                 >
-                  <title id={trendDescriptionId}>Weekly cruelty footprint trend</title>
+                  <title id={trendDescriptionId}>Weekly welfare footprint trend</title>
                   <desc>{`The trend ranges from ${displayNumber(trend.min)} to ${displayNumber(trend.max)}. Lower scores are kinder.`}</desc>
                   {trend.ticks.map((tick) => (
                     <g key={tick.value}>
@@ -360,7 +362,7 @@ export function AnalyticsPanel({
                 <span>{trend.points[trend.points.length - 1].label}</span>
               </div>
               <table className={styles.srOnly}>
-                <caption>Weekly cruelty footprint trend</caption>
+                <caption>Weekly welfare footprint trend</caption>
                 <thead><tr><th scope="col">Week</th><th scope="col">Score</th><th scope="col">Note</th></tr></thead>
                 <tbody>{trend.points.map((point, index) => <tr key={point.id ?? `${point.label}-${index}`}><th scope="row">{point.label}</th><td>{displayMetric(point.safeValue)}</td><td>{point.helper ?? ""}</td></tr>)}</tbody>
               </table>

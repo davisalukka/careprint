@@ -14,7 +14,7 @@ export const VENDOR_IDS = [
 ] as const;
 
 export type VendorId = (typeof VENDOR_IDS)[number];
-export type TrackedFood = "beef" | "salmon" | "eggs" | "milk";
+export type TrackedFood = "chicken" | "eggs" | "pork" | "beef" | "salmon" | "milk";
 export type VendorTone = "mint" | "yellow" | "coral";
 export type SubscriptionFrequency =
   | "weekly"
@@ -43,6 +43,8 @@ export type VendorFixture = {
   name: string;
   detail: string;
   tag: string;
+  /** What Careprint could verify about welfare claims, per the methodology taxonomy. */
+  verification: string;
   mark: string;
   tone: VendorTone;
   products: readonly TrackedFood[];
@@ -60,6 +62,7 @@ export type VendorMarketplaceOffer = Pick<
   | "name"
   | "detail"
   | "tag"
+  | "verification"
   | "mark"
   | "tone"
   | "products"
@@ -111,10 +114,11 @@ const VENDOR_FIXTURES: readonly VendorFixture[] = [
     id: "rowe-farms",
     name: "Rowe Farms",
     detail: "Pasture-raised staples · pickup + local delivery",
-    tag: "Local pickup",
+    tag: "KW · pickup",
+    verification: "Placeholder — verification pending a farm visit",
     mark: "R",
     tone: "mint",
-    products: ["beef", "salmon", "eggs", "milk"],
+    products: ["chicken", "eggs", "beef", "milk"],
     availability: {
       isAvailable: true,
       pickup: true,
@@ -139,10 +143,11 @@ const VENDOR_FIXTURES: readonly VendorFixture[] = [
     id: "west-side-beef",
     name: "West Side Beef",
     detail: "Farm-sourced meat + eggs · recurring boxes",
-    tag: "Subscription",
+    tag: "GTA · delivery",
+    verification: "Placeholder — claims not yet audited against certifications",
     mark: "W",
     tone: "yellow",
-    products: ["beef", "eggs"],
+    products: ["chicken", "eggs", "pork", "beef"],
     availability: {
       isAvailable: true,
       pickup: false,
@@ -166,11 +171,12 @@ const VENDOR_FIXTURES: readonly VendorFixture[] = [
   {
     id: "northern-raised",
     name: "Northern Raised",
-    detail: "Ocean-aware salmon · subscribe, skip, or swap",
-    tag: "Seafood",
+    detail: "Wild-caught salmon · subscribe, skip, or swap",
+    tag: "Ships ON · seafood",
+    verification: "Placeholder — sourcing claims to be verified",
     mark: "N",
     tone: "coral",
-    products: ["beef", "salmon"],
+    products: ["salmon"],
     availability: {
       isAvailable: true,
       pickup: false,
@@ -224,6 +230,7 @@ export function listMarketplaceOffers(): VendorMarketplaceOffer[] {
     name: vendor.name,
     detail: vendor.detail,
     tag: vendor.tag,
+    verification: vendor.verification,
     mark: vendor.mark,
     tone: vendor.tone,
     products: [...vendor.products],

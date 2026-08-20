@@ -37,6 +37,11 @@ test("the demo mounts the dashboard with local-only state", async () => {
   // Overview preview and the Baseline controls.
   assert.match(client, /FootprintVisual profile=\{preview \? preview\.profile : profile\}/);
   assert.match(client, /FootprintVisual profile=\{profile\} showLegend/);
+  // Sharing, backup, and check-ins all stay browser-local.
+  assert.match(client, /encodeProfile/);
+  assert.match(client, /Export JSON/);
+  assert.match(client, /recordCheckIn/);
+  assert.doesNotMatch(client, /simulated/i);
   // The static site has no server: the baseline autosaves to localStorage and
   // must never reach for an API route.
   assert.match(client, /localStorage/);
@@ -75,11 +80,33 @@ test("external boundaries are deterministic local stubs", async () => {
   assert.match(model, /calculateScore/);
   assert.match(model, /calculatePlantShare/);
   assert.match(model, /buildTrend/);
+  // v2 tracks the biggest welfare levers, not just the familiar four.
+  assert.match(model, /"chicken"/);
+  assert.match(model, /"pork"/);
+});
+
+test("the product never claims anything is cruelty-free", async () => {
+  const files = await Promise.all([
+    source("src/LandingPage.tsx"),
+    source("src/DemoPage.tsx"),
+    source("src/dashboard/DashboardClient.tsx"),
+    source("src/dashboard/MarketplacePanel.tsx"),
+  ]);
+  for (const content of files) {
+    // The term may appear only in quotes as rejected vocabulary; it must
+    // never be used as a positive claim. Simplest safe rule: any mention
+    // must sit next to the word "never".
+    for (const match of content.matchAll(/cruelty-free/gi)) {
+      const context = content.slice(Math.max(0, match.index - 120), match.index + 40);
+      assert.match(context, /never/i, `"cruelty-free" without rejection context: …${context}…`);
+    }
+  }
 });
 
 test("the build output is a GitHub Pages compatible static site", async () => {
   assert.ok(existsSync(new URL("dist/index.html", root)), "landing page is emitted");
   assert.ok(existsSync(new URL("dist/demo/index.html", root)), "demo is a real file, not a router fallback");
+  assert.ok(existsSync(new URL("dist/methodology/index.html", root)), "methodology page is emitted");
   assert.ok(existsSync(new URL("dist/.nojekyll", root)), ".nojekyll stops Jekyll stripping asset dirs");
 
   const [landing, demo] = await Promise.all([
