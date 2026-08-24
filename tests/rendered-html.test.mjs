@@ -22,12 +22,17 @@ test("the public page carries the Careprint product promise", async () => {
 });
 
 test("the demo mounts the dashboard with local-only state", async () => {
-  const [demo, client] = await Promise.all([
+  const [demo, client, streamlined] = await Promise.all([
     source("src/DemoPage.tsx"),
     source("src/dashboard/DashboardClient.tsx"),
+    source("src/dashboard/StreamlinedDashboard.tsx"),
   ]);
 
   assert.match(demo, /DashboardClient user=\{demoUser\} demoMode/);
+  assert.match(demo, /StreamlinedDashboard user=\{demoUser\} demoMode/);
+  assert.match(demo, /ui-mode-toggle/);
+  assert.match(streamlined, /Weekly Baseline/);
+  assert.match(streamlined, /FootprintVisual profile=\{activeProfile\}/);
   assert.match(client, /Try a maneuver/);
   assert.match(client, /Preview →/);
   assert.match(client, /AnalyticsPanel/);

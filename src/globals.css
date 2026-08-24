@@ -132,7 +132,11 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 
 /* Dashboard */
 .dashboard-shell { margin: 0 auto; max-width: 1280px; padding: 0 42px 72px; }
-.dashboard-header { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; padding: 24px 0 19px; }.dashboard-nav { align-items: center; display: flex; gap: 26px; }.dashboard-nav a { color: var(--muted); font-size: 11px; }.dashboard-nav a:hover { color: var(--ink); }
+.dashboard-header { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; padding: 24px 0 19px; gap: 16px; flex-wrap: wrap; }.dashboard-nav { align-items: center; display: flex; gap: 26px; }.dashboard-nav a { color: var(--muted); font-size: 11px; }.dashboard-nav a:hover { color: var(--ink); }
+.ui-mode-toggle { display: inline-flex; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; }
+.ui-mode-btn { background: transparent; border: 0; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--muted); padding: 5px 14px; cursor: pointer; transition: all 150ms ease; }
+.ui-mode-btn:hover { color: var(--ink); }
+.ui-mode-btn.is-active { background: var(--white); color: var(--ink); box-shadow: 0 2px 8px rgba(25, 48, 36, 0.08); }
 .account-chip { align-items: center; background: var(--white); border: 1px solid var(--line); border-radius: 999px; display: flex; font-size: 11px; gap: 9px; padding: 6px 11px 6px 6px; }.account-avatar { align-items: center; background: var(--coral); border-radius: 50%; color: var(--white); display: flex; font-size: 10px; font-weight: 800; height: 24px; justify-content: center; width: 24px; }.account-chip span:last-child { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dashboard-welcome { align-items: end; display: flex; justify-content: space-between; padding: 63px 0 37px; }.dashboard-welcome h1 { font-size: clamp(39px, 5vw, 61px); font-weight: 500; letter-spacing: -0.075em; line-height: 0.95; margin: 0; }.dashboard-welcome p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 14px 0 0; }
 .sync-status { align-items: center; color: var(--muted); display: flex; font-size: 10px; gap: 7px; }.sync-status::before { background: var(--yellow); border-radius: 50%; content: ""; height: 7px; width: 7px; }.sync-status.is-saved::before { background: var(--sage); }.sync-status.is-error::before { background: var(--coral); }
