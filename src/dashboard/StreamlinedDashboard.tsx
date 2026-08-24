@@ -386,6 +386,7 @@ export function StreamlinedDashboard({
           {/* Contextual Verified Sourcing */}
           {contextualVendor ? (
             <div className={styles.contextualVendor}>
+              <span className={styles.vendorMark}>{contextualVendor.mark}</span>
               <div className={styles.vendorInfo}>
                 <strong>{contextualVendor.name}</strong>
                 <span>{contextualVendor.detail}</span>
@@ -404,16 +405,14 @@ export function StreamlinedDashboard({
           onClick={() => setShowDeepDive((prev) => !prev)}
           aria-expanded={showDeepDive}
         >
-          <span>📊 View Footprint Breakdown & Methodology</span>
-          <span>{showDeepDive ? "▲ Collapse" : "▼ Expand"}</span>
+          <span>📊 Footprint Breakdown & Methodology</span>
+          <span className={`${styles.drawerChevron} ${showDeepDive ? styles.drawerChevronOpen : ""}`}>▼</span>
         </button>
 
         {showDeepDive ? (
           <div className={styles.drawerBody}>
             <div>
-              <h4 style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: 700 }}>
-                Estimated Points by Food
-              </h4>
+              <h4 className={styles.drawerSubtitle}>Estimated pressure by food</h4>
               <div className={styles.breakdownGrid}>
                 {breakdown.map((item) => {
                   const widthPercent = (item.value / maxBreakdownValue) * 100;
@@ -439,16 +438,26 @@ export function StreamlinedDashboard({
             </div>
 
             <div>
-              <h4 style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: 700 }}>
-                How the Score Works
-              </h4>
-              <p style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.5, margin: "0 0 12px" }}>
-                Each food item's welfare score is calculated by multiplying its weekly frequency by a
-                verifiable welfare impact coefficient based on housing, transport, and slaughter standards.
+              <h4 className={styles.drawerSubtitle}>How the score works</h4>
+              <p className={styles.methodBody}>
+                Careprint multiplies how often a choice shows up by a directional welfare signal
+                for its source. That's the entire model.
               </p>
-              <div className={styles.methodFootnote}>
-                <a href={METHODOLOGY_PATH}>Read complete methodology & research weights ↗</a>
+              <div className={styles.formulaBlock}>
+                <div className={styles.formulaLine}>
+                  <span>frequency</span> × <span>welfare signal</span> = <strong>weekly estimate</strong>
+                </div>
+                <div className={styles.formulaLine}>
+                  <span>your baseline</span> − <span>one maneuver</span> = <strong>new estimate</strong>
+                </div>
               </div>
+              <a className={styles.methodLink} href={METHODOLOGY_PATH}>
+                Read full methodology & weights <span aria-hidden="true">↗</span>
+              </a>
+              <p className={styles.methodCaption}>
+                Lower is kinder. No vendor can pay to change the math.
+                This is an educational estimate, not a certification.
+              </p>
             </div>
           </div>
         ) : null}
