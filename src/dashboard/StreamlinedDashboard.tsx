@@ -349,7 +349,9 @@ export function StreamlinedDashboard({
           {topScenario ? (
             <div className={styles.leverSpotlight}>
               <div className={styles.leverTop}>
-                <span className={styles.leverHeader}>⭐ Lowest-Hanging Fruit</span>
+                <span className={styles.leverHeader}>
+                  ⭐ Lowest-Hanging Fruit · {EFFORT_META[topScenario.effort].icon} {EFFORT_META[topScenario.effort].label}
+                </span>
                 <span className={styles.leverDelta}>
                   −{score - calculateScore(topScenario.profile)} pts
                 </span>
