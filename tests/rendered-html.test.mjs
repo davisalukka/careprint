@@ -10,15 +10,58 @@ async function source(pathname) {
 }
 
 test("the public page carries the Careprint product promise", async () => {
-  const [page, shell] = await Promise.all([
+  const [page, shell, paths] = await Promise.all([
     source("src/LandingPage.tsx"),
     source("index.html"),
+    source("src/paths.ts"),
   ]);
 
   assert.match(shell, /Careprint — make the kindest next swap/);
   assert.match(page, /Make the kindest next swap\./);
   assert.match(page, /Directional, not absolute\./);
   assert.match(page, /Affiliate money stays visible\./);
+  assert.match(page, /Partner with Careprint/);
+  assert.match(page, /Ontario higher-welfare farms/);
+  assert.match(page, /REPO_ISSUES_URL/);
+  assert.match(paths, /github.com\/davisalukka\/careprint/);
+  assert.doesNotMatch(page, /mailto:/);
+});
+
+test("referral disclosure sits next to vendor recommendations", async () => {
+  const [copy, marketplace, streamlined, methodology] = await Promise.all([
+    source("src/lib/affiliate-copy.ts"),
+    source("src/dashboard/MarketplacePanel.tsx"),
+    source("src/dashboard/StreamlinedDashboard.tsx"),
+    source("src/MethodologyPage.tsx"),
+  ]);
+
+  assert.match(copy, /we may earn a referral fee if you order via this link or code/);
+  assert.match(copy, /Paid placement never changes score math or vendor ranking/);
+  assert.match(marketplace, /UNAFFILIATED_CARD_NOTE/);
+  assert.match(marketplace, /PLACEMENT_INVARIANT/);
+  assert.match(streamlined, /UNAFFILIATED_CARD_NOTE/);
+  assert.match(streamlined, /PLACEMENT_INVARIANT/);
+  assert.match(methodology, /REFERRAL_FEE_DISCLOSURE/);
+  assert.match(methodology, /PLACEMENT_INVARIANT/);
+});
+
+test("directory ranking ignores affiliate eligibility", async () => {
+  const { listMarketplaceOffers, listVendorCatalog } = await import("../src/lib/integration-stubs.ts");
+  const offers = listMarketplaceOffers();
+  const catalog = listVendorCatalog();
+
+  assert.deepEqual(
+    offers.map((offer) => offer.id),
+    catalog.map((vendor) => vendor.id),
+    "directory order is fixture order, not paid order",
+  );
+  for (const offer of offers) {
+    assert.equal("affiliate" in offer, false, "marketplace offers do not carry affiliate fields");
+  }
+  assert.ok(
+    catalog.every((vendor) => vendor.affiliate.eligible === false),
+    "fixtures stay unmonetized — no invented affiliate programs",
+  );
 });
 
 test("the demo mounts the dashboard with local-only state", async () => {
@@ -96,6 +139,9 @@ test("the product never claims anything is cruelty-free", async () => {
     source("src/DemoPage.tsx"),
     source("src/dashboard/DashboardClient.tsx"),
     source("src/dashboard/MarketplacePanel.tsx"),
+    source("src/dashboard/StreamlinedDashboard.tsx"),
+    source("src/MethodologyPage.tsx"),
+    source("src/lib/affiliate-copy.ts"),
   ]);
   for (const content of files) {
     // The term may appear only in quotes as rejected vocabulary; it must

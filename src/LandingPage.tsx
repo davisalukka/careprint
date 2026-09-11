@@ -1,4 +1,5 @@
-import { DEMO_PATH, HOME_PATH, METHODOLOGY_PATH } from "./paths";
+import { PLACEMENT_INVARIANT } from "./lib/affiliate-copy";
+import { DEMO_PATH, HOME_PATH, METHODOLOGY_PATH, REPO_ISSUES_URL } from "./paths";
 
 export function LandingPage() {
   return (
@@ -11,6 +12,7 @@ export function LandingPage() {
         <nav className="top-nav" aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#trust">Our promise</a>
+          <a href="#partners">Partners</a>
           <a href={METHODOLOGY_PATH}>Methodology</a>
           <a className="button button-small button-ghost" href={DEMO_PATH}>Open the demo</a>
         </nav>
@@ -103,6 +105,46 @@ export function LandingPage() {
             <div><span>02</span><p><strong>Affiliate money stays visible.</strong> Partner links say they’re partner links, and no vendor can buy their way into your score or their ranking.</p></div>
             <div><span>03</span><p><strong>Progress beats purity.</strong> We’d rather you make one real swap than feel guilty about ten imaginary ones. Many of the kindest moves also save money.</p></div>
           </div>
+        </div>
+      </section>
+
+      <section className="partner-section" id="partners" aria-labelledby="partner-heading">
+        <div className="section-heading">
+          <p className="eyebrow"><span className="eyebrow-dot eyebrow-dot-coral" /> For farms and box services</p>
+          <h2 id="partner-heading">Partner with Careprint.</h2>
+          <p>
+            Careprint is building a curated higher-welfare directory for Ontario shoppers —
+            one region done properly, starting with Kitchener-Waterloo and the GTA. Money
+            comes later, and only when it can stay honest.
+          </p>
+        </div>
+        <div className="partner-offer-grid">
+          <article className="partner-offer-card">
+            <span className="label-caps">Who this is for</span>
+            <h3>Ontario higher-welfare farms and box services.</h3>
+            <p>
+              Direct farms, CSAs, and subscription boxes that can show what we can verify —
+              audited certifications, Canadian Organic, or a farm visit — not unverified
+              marketing claims.
+            </p>
+          </article>
+          <article className="partner-offer-card partner-offer-card-featured">
+            <span className="label-caps">What we offer</span>
+            <h3>A curated directory first. Disclosed referrals later.</h3>
+            <p>
+              Listings start unmonetized. If a referral agreement is ever added, the card
+              will say so in plain language. {PLACEMENT_INVARIANT}
+            </p>
+          </article>
+        </div>
+        <div className="partner-cta-row">
+          <a className="button button-primary" href={REPO_ISSUES_URL} rel="noopener noreferrer">
+            Open a partnership note on GitHub<span aria-hidden="true">↗</span>
+          </a>
+          <p className="partner-contact-note">
+            This is a static site with no inbox. The public repository is the contact
+            path that already exists — leave a GitHub issue and we’ll take it from there.
+          </p>
         </div>
       </section>
 

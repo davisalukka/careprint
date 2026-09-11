@@ -134,9 +134,9 @@ const VENDOR_FIXTURES: readonly VendorFixture[] = [
       minimumRenewals: null,
     },
     affiliate: {
-      eligible: true,
+      eligible: false,
       disclosure:
-        "Careprint may earn a commission if a future partner link leads to a qualifying purchase.",
+        "Careprint earns nothing from this listing today. If a referral agreement is added, we may earn a referral fee if you order via this link or code.",
     },
   },
   {
@@ -163,9 +163,9 @@ const VENDOR_FIXTURES: readonly VendorFixture[] = [
       minimumRenewals: 4,
     },
     affiliate: {
-      eligible: true,
+      eligible: false,
       disclosure:
-        "Careprint may earn a commission if a future partner link leads to a qualifying purchase.",
+        "Careprint earns nothing from this listing today. If a referral agreement is added, we may earn a referral fee if you order via this link or code.",
     },
   },
   {
@@ -192,9 +192,9 @@ const VENDOR_FIXTURES: readonly VendorFixture[] = [
       minimumRenewals: null,
     },
     affiliate: {
-      eligible: true,
+      eligible: false,
       disclosure:
-        "Careprint may earn a commission if a future partner link leads to a qualifying purchase.",
+        "Careprint earns nothing from this listing today. If a referral agreement is added, we may earn a referral fee if you order via this link or code.",
     },
   },
 ];

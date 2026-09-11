@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PLACEMENT_INVARIANT, UNAFFILIATED_CARD_NOTE } from "../lib/affiliate-copy";
 import { listMarketplaceOffers, recordAffiliateClick } from "../lib/integration-stubs";
 
 type PartnerOffer = {
@@ -44,15 +45,20 @@ export function MarketplacePanel({ demoMode = false }: { demoMode?: boolean }) {
       <h2 id="marketplace-heading">A curated directory, before any money moves.</h2>
       <p>A hand-checked list of higher-welfare vendors, starting with one region done properly: Kitchener-Waterloo and the GTA. Nothing here pays for placement, and every card shows what we could actually verify—these are placeholders until each vendor is.</p>
       <div className="stub-banner"><span>◎</span> Mock directory entries · no external redirect</div>
-      {offers.map((offer) => (
-        <button className="marketplace-link" key={offer.id} type="button" onClick={() => handleOfferClick(offer)} aria-label={`Preview ${offer.name} directory entry`}>
-          <span className={`marketplace-link-mark ${offer.tone}`}>{offer.mark}</span>
-          <span><strong>{offer.name}</strong><span>{offer.detail}</span><span className="marketplace-verification">{offer.verification}</span></span>
-          <span className="marketplace-tag">{offer.tag}</span>
-          <span className="marketplace-link-arrow" aria-hidden="true">{clickedOffer === offer.id ? "✓" : "↗"}</span>
-        </button>
-      ))}
-      <p className="affiliate-note">Disclosure: Careprint earns nothing from these listings today. If a referral agreement is ever added, the affected card will say so right here—“we may earn a referral fee if you order via this link or code”—and payment will never change ranking or score math.</p>
+      <ul className="marketplace-offer-list">
+        {offers.map((offer) => (
+          <li className="marketplace-offer" key={offer.id}>
+            <button className="marketplace-link" type="button" onClick={() => handleOfferClick(offer)} aria-label={`Preview ${offer.name} directory entry`}>
+              <span className={`marketplace-link-mark ${offer.tone}`}>{offer.mark}</span>
+              <span><strong>{offer.name}</strong><span>{offer.detail}</span><span className="marketplace-verification">{offer.verification}</span></span>
+              <span className="marketplace-tag">{offer.tag}</span>
+              <span className="marketplace-link-arrow" aria-hidden="true">{clickedOffer === offer.id ? "✓" : "↗"}</span>
+            </button>
+            <p className="marketplace-offer-disclosure">{UNAFFILIATED_CARD_NOTE}</p>
+          </li>
+        ))}
+      </ul>
+      <p className="affiliate-note">{PLACEMENT_INVARIANT} Listings stay in curated order, not paid order.</p>
     </section>
   );
 }
