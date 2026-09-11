@@ -26,6 +26,7 @@ import {
   type Scenario,
   type SourceKey,
 } from "../lib/footprint-model";
+import { PLACEMENT_INVARIANT, UNAFFILIATED_CARD_NOTE } from "../lib/affiliate-copy";
 import { listMarketplaceOffers } from "../lib/integration-stubs";
 import { METHODOLOGY_PATH } from "../paths";
 import { FootprintVisual } from "./FootprintVisual";
@@ -383,16 +384,23 @@ export function StreamlinedDashboard({
             </div>
           ) : null}
 
-          {/* Contextual Verified Sourcing */}
+          {/* Contextual higher-welfare directory card */}
           {contextualVendor ? (
-            <div className={styles.contextualVendor}>
-              <span className={styles.vendorMark}>{contextualVendor.mark}</span>
-              <div className={styles.vendorInfo}>
-                <strong>{contextualVendor.name}</strong>
-                <span>{contextualVendor.detail}</span>
+            <section className={styles.contextualVendor} id="partners" aria-labelledby="streamlined-vendor-heading">
+              <span className={styles.vendorEyebrow}>Higher-welfare directory · KW / GTA pilot</span>
+              <h3 className={styles.vendorHeading} id="streamlined-vendor-heading">A curated match for this move.</h3>
+              <div className={styles.vendorRow}>
+                <span className={styles.vendorMark}>{contextualVendor.mark}</span>
+                <div className={styles.vendorInfo}>
+                  <strong>{contextualVendor.name}</strong>
+                  <span>{contextualVendor.detail}</span>
+                </div>
+                <span className={styles.vendorTag}>{contextualVendor.tag}</span>
               </div>
-              <span className={styles.vendorTag}>{contextualVendor.tag}</span>
-            </div>
+              <p className={styles.vendorVerification}>{contextualVendor.verification}</p>
+              <p className={styles.vendorDisclosure}>{UNAFFILIATED_CARD_NOTE}</p>
+              <p className={styles.vendorInvariant}>{PLACEMENT_INVARIANT}</p>
+            </section>
           ) : null}
         </aside>
       </div>

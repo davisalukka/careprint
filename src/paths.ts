@@ -6,3 +6,7 @@ const base = import.meta.env.BASE_URL;
 export const HOME_PATH = base;
 export const DEMO_PATH = `${base}demo/`;
 export const METHODOLOGY_PATH = `${base}methodology/`;
+
+/** The only public contact path already published for this project. No inbox exists. */
+export const REPO_URL = "https://github.com/davisalukka/careprint";
+export const REPO_ISSUES_URL = `${REPO_URL}/issues`;

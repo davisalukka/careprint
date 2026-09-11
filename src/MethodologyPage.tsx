@@ -1,3 +1,4 @@
+import { PLACEMENT_INVARIANT, REFERRAL_FEE_DISCLOSURE } from "./lib/affiliate-copy";
 import { FOOD_KEYS, FOOD_META, MAX_SERVINGS } from "./lib/footprint-model";
 import { DEMO_PATH, HOME_PATH, METHODOLOGY_PATH } from "./paths";
 
@@ -173,9 +174,8 @@ export function MethodologyPage() {
           <p>
             Careprint earns nothing today. The vendor directory is curated and unmonetized. If
             referral agreements are ever added, each affected card will say so plainly, adjacent to
-            the card ("we may earn a referral fee if you order via this link or code"), and two
-            rules are permanent: <strong>paid placement never changes the score math</strong>, and
-            <strong> paid placement never changes vendor ranking</strong>. We use the term
+            the card (“{REFERRAL_FEE_DISCLOSURE}”), and two rules are permanent:{" "}
+            <strong>{PLACEMENT_INVARIANT}</strong> We use the term
             "higher-welfare" throughout because it is comparative and checkable; we never describe
             any product as "cruelty-free," because that is a claim no one can audit.
           </p>

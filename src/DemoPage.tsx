@@ -72,6 +72,7 @@ export function DemoPage() {
             </>
           ) : (
             <a href={METHODOLOGY_PATH}>Methodology</a>
+            <a href={`${DEMO_PATH}#partners`}>Partners</a>
           )}
           <a href={HOME_PATH}>Exit demo</a>
         </nav>
