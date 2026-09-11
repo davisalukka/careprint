@@ -10,9 +10,10 @@ async function source(pathname) {
 }
 
 test("the public page carries the Careprint product promise", async () => {
-  const [page, shell] = await Promise.all([
+  const [page, shell, paths] = await Promise.all([
     source("src/LandingPage.tsx"),
     source("index.html"),
+    source("src/paths.ts"),
   ]);
 
   assert.match(shell, /Careprint — make the kindest next swap/);
@@ -21,7 +22,8 @@ test("the public page carries the Careprint product promise", async () => {
   assert.match(page, /Affiliate money stays visible\./);
   assert.match(page, /Partner with Careprint/);
   assert.match(page, /Ontario higher-welfare farms/);
-  assert.match(page, /github.com\/davisalukka\/careprint/);
+  assert.match(page, /REPO_ISSUES_URL/);
+  assert.match(paths, /github.com\/davisalukka\/careprint/);
   assert.doesNotMatch(page, /mailto:/);
 });
 
